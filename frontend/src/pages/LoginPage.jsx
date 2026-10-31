@@ -1,8 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Smartphone, Shield, LogIn, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { api } from '../api';
-import { toast } from '../components/Toast';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Card, CardContent } from '../components/ui/card';
+import { cn } from '../lib/utils';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -14,7 +18,7 @@ export default function LoginPage() {
   const handleEmployeeLogin = async (e) => {
     e.preventDefault();
     if (!employeeForm.username.trim() || !employeeForm.password.trim()) {
-      toast.err('Ingresa tu usuario y contraseña');
+      toast.error('Ingresa tu usuario y contraseña');
       return;
     }
 
@@ -27,10 +31,10 @@ export default function LoginPage() {
       localStorage.setItem('token', data.access_token);
       localStorage.setItem('userRole', 'EMPLOYEE');
       localStorage.setItem('employeeData', JSON.stringify(data.employee));
-      toast.ok(`¡Bienvenido, ${data.employee.name}!`);
+      toast.success(`¡Bienvenido, ${data.employee.name}!`);
       navigate('/portal');
     } catch (err) {
-      toast.err(err.message);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
@@ -43,160 +47,159 @@ export default function LoginPage() {
       const data = await api.login(adminForm);
       localStorage.setItem('token', data.access_token);
       localStorage.setItem('userRole', 'ADMIN');
-      toast.ok('Sesión de administrador iniciada');
+      toast.success('Sesión de administrador iniciada');
       navigate('/');
     } catch (err) {
-      toast.err(err.message);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="login-page">
-      <div className="login-box">
-        <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <div className="login-brand-card">
-            <img src="/logo.png" alt="TicketCasino" className="login-logo-img" />
-            <h1 className="brand-title login-brand-title">
-              <span className="brand-ticket">Ticket</span>
-              <span className="brand-casino">Casino</span>
-            </h1>
+    <div className="flex min-h-screen items-center justify-center bg-[#090B10] p-4">
+      <div className="w-full max-w-sm">
+        {/* Brand */}
+        <div className="mb-8 text-center">
+          <div className="mb-4 flex justify-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#10141D] border border-white/10 shadow-xl">
+              <img src="/logo.png" alt="TicketCasino" className="h-10 w-10 rounded-xl object-cover" />
+            </div>
           </div>
-          <p className="sub" style={{ marginTop: 12 }}>Sistema Digital de Alimentación</p>
+          <h1 className="text-2xl font-extrabold tracking-tight">
+            <span className="text-[#F1F5F9]">Ticket</span>
+            <span className="text-[#D97706]">Casino</span>
+          </h1>
+          <p className="mt-1.5 text-sm text-[#64748B]">Sistema Digital de Alimentación</p>
         </div>
 
-        {/* Pestañas para elegir tipo de acceso */}
-        <div
-          className="tabs"
-          style={{
-            width: '100%',
-            justifyContent: 'center',
-            marginBottom: 20,
-            display: 'flex',
-          }}
-        >
+        {/* Tab switcher */}
+        <div className="mb-4 flex rounded-xl bg-[#10141D] border border-white/[0.07] p-1">
           <button
             type="button"
-            className={`tab ${mode === 'employee' ? 'active' : ''}`}
-            style={{ flex: 1, textAlign: 'center', padding: '10px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}
             onClick={() => setMode('employee')}
+            className={cn(
+              'flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+              mode === 'employee'
+                ? 'bg-[#F59E0B] text-[#090B10] font-semibold'
+                : 'text-[#64748B] hover:text-[#F1F5F9]'
+            )}
           >
-            <Smartphone size={16} /> Empleado
+            <Smartphone size={15} /> Empleado
           </button>
           <button
             type="button"
-            className={`tab ${mode === 'admin' ? 'active' : ''}`}
-            style={{ flex: 1, textAlign: 'center', padding: '10px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}
             onClick={() => setMode('admin')}
+            className={cn(
+              'flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+              mode === 'admin'
+                ? 'bg-[#F59E0B] text-[#090B10] font-semibold'
+                : 'text-[#64748B] hover:text-[#F1F5F9]'
+            )}
           >
-            <Shield size={16} /> Administrador
+            <Shield size={15} /> Administrador
           </button>
         </div>
 
+        {/* Employee form */}
         {mode === 'employee' ? (
-          <form className="card" onSubmit={handleEmployeeLogin}>
-            <div style={{ marginBottom: 14 }}>
-              <h3 style={{ fontSize: 16, marginBottom: 4 }}>Acceso para Empleados</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: 12 }}>
-                Ingresa con tu usuario y contraseña asignados
-              </p>
-            </div>
+          <Card>
+            <CardContent>
+              <div className="mb-5">
+                <h3 className="text-sm font-bold text-[#F1F5F9]">Acceso para Empleados</h3>
+                <p className="mt-1 text-xs text-[#64748B]">
+                  Ingresa con tu usuario y contraseña asignados
+                </p>
+              </div>
 
-            <div className="form-group">
-              <label>Usuario o Cédula</label>
-              <input
-                autoFocus
-                placeholder="Ej: jperez o 1045678901"
-                value={employeeForm.username}
-                onChange={(e) =>
-                  setEmployeeForm({ ...employeeForm, username: e.target.value })
-                }
-                style={{ fontSize: 15, padding: '11px 14px' }}
-              />
-            </div>
+              <form onSubmit={handleEmployeeLogin} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-[#94A3B8] uppercase tracking-wide">
+                    Usuario o Cédula
+                  </label>
+                  <Input
+                    autoFocus
+                    placeholder="Ej: jperez o 1045678901"
+                    value={employeeForm.username}
+                    onChange={(e) =>
+                      setEmployeeForm({ ...employeeForm, username: e.target.value })
+                    }
+                  />
+                </div>
 
-            <div className="form-group">
-              <label>Contraseña</label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={employeeForm.password}
-                onChange={(e) =>
-                  setEmployeeForm({ ...employeeForm, password: e.target.value })
-                }
-                style={{ fontSize: 15, padding: '11px 14px' }}
-              />
-            </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-[#94A3B8] uppercase tracking-wide">
+                    Contraseña
+                  </label>
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    value={employeeForm.password}
+                    onChange={(e) =>
+                      setEmployeeForm({ ...employeeForm, password: e.target.value })
+                    }
+                  />
+                </div>
 
-            <button
-              type="submit"
-              className="btn btn-primary"
-              style={{
-                width: '100%',
-                justifyContent: 'center',
-                marginTop: 10,
-                padding: '12px',
-                fontSize: 14,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 7,
-              }}
-              disabled={loading}
-            >
-              {loading ? (
-                <><Loader2 className="spin" size={16} /> Verificando...</>
-              ) : (
-                <><LogIn size={16} /> Entrar a Mis Tickets</>
-              )}
-            </button>
-          </form>
+                <Button type="submit" className="w-full mt-2" size="lg" disabled={loading}>
+                  {loading ? (
+                    <><Loader2 className="spin" size={16} /> Verificando...</>
+                  ) : (
+                    <><LogIn size={16} /> Entrar a Mis Tickets</>
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
         ) : (
-          <form className="card" onSubmit={handleAdminLogin}>
-            <div style={{ marginBottom: 14 }}>
-              <h3 style={{ fontSize: 16, marginBottom: 4 }}>Panel de Administración</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: 12 }}>
-                Acceso restringido a operadores del casino
-              </p>
-            </div>
+          <Card>
+            <CardContent>
+              <div className="mb-5">
+                <h3 className="text-sm font-bold text-[#F1F5F9]">Panel de Administración</h3>
+                <p className="mt-1 text-xs text-[#64748B]">
+                  Acceso restringido a operadores del casino
+                </p>
+              </div>
 
-            <div className="form-group">
-              <label>Usuario Administrador</label>
-              <input
-                autoFocus
-                placeholder="admin"
-                value={adminForm.username}
-                onChange={(e) =>
-                  setAdminForm({ ...adminForm, username: e.target.value })
-                }
-              />
-            </div>
+              <form onSubmit={handleAdminLogin} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-[#94A3B8] uppercase tracking-wide">
+                    Usuario Administrador
+                  </label>
+                  <Input
+                    autoFocus
+                    placeholder="admin"
+                    value={adminForm.username}
+                    onChange={(e) =>
+                      setAdminForm({ ...adminForm, username: e.target.value })
+                    }
+                  />
+                </div>
 
-            <div className="form-group">
-              <label>Contraseña</label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={adminForm.password}
-                onChange={(e) =>
-                  setAdminForm({ ...adminForm, password: e.target.value })
-                }
-              />
-            </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-[#94A3B8] uppercase tracking-wide">
+                    Contraseña
+                  </label>
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    value={adminForm.password}
+                    onChange={(e) =>
+                      setAdminForm({ ...adminForm, password: e.target.value })
+                    }
+                  />
+                </div>
 
-            <button
-              type="submit"
-              className="btn btn-primary"
-              style={{ width: '100%', justifyContent: 'center', marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 7 }}
-              disabled={loading}
-            >
-              {loading ? (
-                <><Loader2 className="spin" size={16} /> Ingresando...</>
-              ) : (
-                <><LogIn size={16} /> Iniciar Sesión</>
-              )}
-            </button>
-          </form>
+                <Button type="submit" className="w-full mt-2" size="lg" disabled={loading}>
+                  {loading ? (
+                    <><Loader2 className="spin" size={16} /> Ingresando...</>
+                  ) : (
+                    <><LogIn size={16} /> Iniciar Sesión</>
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>

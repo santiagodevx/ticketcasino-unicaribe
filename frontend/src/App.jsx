@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { ToastProvider } from './components/Toast';
+import { Toaster } from 'sonner';
 import Sidebar from './components/Sidebar';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
@@ -16,9 +16,11 @@ function AdminLayout({ children }) {
   if (role === 'EMPLOYEE') return <Navigate to="/portal" replace />;
 
   return (
-    <div className="layout">
+    <div className="flex min-h-screen bg-[#090B10]">
       <Sidebar />
-      <main className="main">{children}</main>
+      <main className="flex-1 ml-0 md:ml-[240px] p-6 lg:p-8 min-h-screen">
+        {children}
+      </main>
     </div>
   );
 }
@@ -32,7 +34,17 @@ function EmployeeRoute({ children }) {
 export default function App() {
   return (
     <BrowserRouter>
-      <ToastProvider />
+      <Toaster
+        position="top-right"
+        theme="dark"
+        toastOptions={{
+          style: {
+            background: '#10141D',
+            border: '1px solid rgba(255,255,255,0.1)',
+            color: '#F1F5F9',
+          },
+        }}
+      />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route

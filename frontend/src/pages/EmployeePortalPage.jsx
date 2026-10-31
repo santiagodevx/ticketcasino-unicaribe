@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { RefreshCw, LogOut, Utensils, Coffee, QrCode, Clock } from 'lucide-react';
+import { RefreshCw, LogOut, Utensils, Coffee, QrCode, Clock, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { api } from '../api';
-import { toast } from '../components/Toast';
 import QRCodeView from '../components/QRCodeView';
+import { Button } from '../components/ui/button';
+import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
+import { Dialog, DialogContent } from '../components/ui/dialog';
 
 export default function EmployeePortalPage() {
   const navigate = useNavigate();
@@ -17,24 +20,17 @@ export default function EmployeePortalPage() {
     if (showLoadingState) setLoading(true);
     try {
       const stored = localStorage.getItem('employeeData');
-      if (!stored) {
-        navigate('/login');
-        return null;
-      }
+      if (!stored) { navigate('/login'); return null; }
       const emp = JSON.parse(stored);
       setEmployee(emp);
 
-      const [tickets, sum] = await Promise.all([
-        api.getActive(emp.id),
-        api.getMySummary(),
-      ]);
-
+      const [tickets, sum] = await Promise.all([api.getActive(emp.id), api.getMySummary()]);
       const activeList = tickets || [];
       setActiveTickets(activeList);
       setSummary(sum);
       return { tickets: activeList, summary: sum };
     } catch (err) {
-      toast.err(err.message);
+      toast.error(err.message);
       return null;
     } finally {
       if (showLoadingState) setLoading(false);
@@ -46,35 +42,22 @@ export default function EmployeePortalPage() {
     const fetchInitial = async () => {
       try {
         const stored = localStorage.getItem('employeeData');
-        if (!stored) {
-          navigate('/login');
-          return;
-        }
+        if (!stored) { navigate('/login'); return; }
         const emp = JSON.parse(stored);
         if (!ignore) setEmployee(emp);
 
-        const [tickets, sum] = await Promise.all([
-          api.getActive(emp.id),
-          api.getMySummary(),
-        ]);
-
+        const [tickets, sum] = await Promise.all([api.getActive(emp.id), api.getMySummary()]);
         if (!ignore) {
           setActiveTickets(tickets || []);
           setSummary(sum);
           setLoading(false);
         }
       } catch (err) {
-        if (!ignore) {
-          toast.err(err.message);
-          setLoading(false);
-        }
+        if (!ignore) { toast.error(err.message); setLoading(false); }
       }
     };
-
     fetchInitial();
-    return () => {
-      ignore = true;
-    };
+    return () => { ignore = true; };
   }, [navigate]);
 
   const handleLogout = () => {
@@ -87,14 +70,13 @@ export default function EmployeePortalPage() {
   const handleCloseModal = async () => {
     const closedTicket = selectedTicket;
     setSelectedTicket(null);
-
     if (closedTicket) {
       const updated = await loadData(false);
       if (updated?.tickets) {
         const stillActive = updated.tickets.some((t) => t.id === closedTicket.id);
         if (!stillActive) {
           const typeName = closedTicket.type === 'ALMUERZO' ? 'Almuerzo' : 'Merienda';
-          toast.ok(`¡Ticket de ${typeName} canjeado con éxito!`);
+          toast.success(`¡Ticket de ${typeName} canjeado con éxito!`);
         }
       }
     }
@@ -102,224 +84,147 @@ export default function EmployeePortalPage() {
 
   const showTicketQR = (type) => {
     const ticket = activeTickets.find((t) => t.type === type);
-    if (!ticket) {
-      toast.err(`No tienes tickets activos de ${type} en este periodo`);
-      return;
-    }
+    if (!ticket) { toast.error(`No tienes tickets activos de ${type} en este periodo`); return; }
     setSelectedTicket(ticket);
   };
 
   if (loading) {
-    return <div className="loading" style={{ minHeight: '100vh' }}>Cargando tus tickets...</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center gap-3 bg-[#090B10] text-[#64748B]">
+        <Loader2 size={20} className="spin" /> Cargando tus tickets...
+      </div>
+    );
   }
 
   const almuerzos = activeTickets.filter((t) => t.type === 'ALMUERZO');
   const meriendas = activeTickets.filter((t) => t.type === 'MERIENDA');
 
   return (
-    <div className="portal-container">
-      {/* Encabezado Mobile */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 20,
-          borderBottom: '1px solid var(--border)',
-          paddingBottom: 14,
-        }}
-      >
-        <div>
-          <div className="brand-badge" style={{ marginBottom: 12 }}>
-            <img src="/logo.png" alt="TicketCasino" className="brand-badge-logo" />
-            <span className="brand-title">
-              <span className="brand-ticket">Ticket</span>
-              <span className="brand-casino">Casino</span>
-            </span>
-          </div>
-          <h2 style={{ fontSize: 20, fontWeight: 800 }}>¡Hola, {employee?.name?.split(' ')[0]}!</h2>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-            @{employee?.username} · C.C. {employee?.document}
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <button
-            type="button"
-            className="btn btn-secondary btn-sm"
-            onClick={() => loadData(false)}
-            title="Actualizar saldo"
-            style={{ padding: '6px 10px', display: 'inline-flex', alignItems: 'center' }}
-          >
-            <RefreshCw size={14} />
-          </button>
-          <button
-            type="button"
-            className="btn btn-secondary btn-sm"
-            onClick={handleLogout}
-            title="Cerrar sesión"
-            style={{ padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: 6 }}
-          >
-            <LogOut size={14} /> Salir
-          </button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-[#090B10] p-4 pb-8">
+      <div className="mx-auto max-w-sm space-y-5">
 
-      {/* Saldo de Tickets Disponibles */}
-      <h3 style={{ fontSize: 13, fontWeight: 700, marginBottom: 12, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-        Tus Tickets Disponibles (Periodo Actual)
-      </h3>
-
-      <div className="portal-tickets-grid">
-        {/* Tarjeta Almuerzo */}
-        <div
-          className="card"
-          style={{
-            textAlign: 'center',
-            borderColor: almuerzos.length > 0 ? 'rgba(245, 158, 11, 0.3)' : 'var(--border)',
-            background: almuerzos.length > 0 ? 'rgba(245, 158, 11, 0.05)' : 'var(--surface)',
-          }}
-        >
-          <div style={{ marginBottom: 6, display: 'flex', justifyContent: 'center' }}>
-            <Utensils size={28} color="var(--primary)" />
-          </div>
-          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)' }}>ALMUERZOS</div>
-          <div style={{ fontSize: 32, fontWeight: 800, color: 'var(--primary)', margin: '4px 0' }}>
-            {almuerzos.length}
-          </div>
-          <button
-            className="btn btn-primary btn-sm"
-            style={{ width: '100%', justifyContent: 'center', marginTop: 6, display: 'inline-flex', alignItems: 'center', gap: 6 }}
-            disabled={almuerzos.length === 0}
-            onClick={() => showTicketQR('ALMUERZO')}
-          >
-            <QrCode size={14} /> Mostrar QR
-          </button>
-        </div>
-
-        {/* Tarjeta Merienda */}
-        <div
-          className="card"
-          style={{
-            textAlign: 'center',
-            borderColor: meriendas.length > 0 ? 'rgba(245, 158, 11, 0.3)' : 'var(--border)',
-            background: meriendas.length > 0 ? 'rgba(245, 158, 11, 0.05)' : 'var(--surface)',
-          }}
-        >
-          <div style={{ marginBottom: 6, display: 'flex', justifyContent: 'center' }}>
-            <Coffee size={28} color="var(--warning)" />
-          </div>
-          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)' }}>MERIENDAS</div>
-          <div style={{ fontSize: 32, fontWeight: 800, color: 'var(--warning)', margin: '4px 0' }}>
-            {meriendas.length}
-          </div>
-          <button
-            className="btn btn-secondary btn-sm"
-            style={{ width: '100%', justifyContent: 'center', marginTop: 6, display: 'inline-flex', alignItems: 'center', gap: 6 }}
-            disabled={meriendas.length === 0}
-            onClick={() => showTicketQR('MERIENDA')}
-          >
-            <QrCode size={14} /> Mostrar QR
-          </button>
-        </div>
-      </div>
-
-      {/* Historial Reciente de Consumos */}
-      <div className="card">
-        <h4 style={{ fontSize: 14, fontWeight: 700, marginBottom: 14, display: 'inline-flex', alignItems: 'center', gap: 7 }}>
-          <Clock size={16} /> Tus últimos consumos
-        </h4>
-        {summary?.historialReciente?.length === 0 ? (
-          <div className="empty" style={{ padding: '24px 10px' }}>
-            <p>Aún no has registrado consumos en este periodo.</p>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {summary?.historialReciente?.slice(0, 5).map((item) => (
-              <div
-                key={item.id}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '8px 12px',
-                  background: 'var(--surface2)',
-                  borderRadius: 8,
-                  fontSize: 13,
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', opacity: 0.8 }}>
-                    {item.type === 'ALMUERZO' ? <Utensils size={14} /> : <Coffee size={14} />}
-                  </span>
-                  <strong>{item.type}</strong>
-                </div>
-                <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>
-                  {item.usedAt ? new Date(item.usedAt).toLocaleString('es-CO') : 'Usado'}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Modal para presentar el QR en el comedor */}
-      {selectedTicket && (
-        <div className="modal-overlay" onClick={handleCloseModal}>
-          <div
-            className="modal ticket-modal"
-            style={{ textAlign: 'center', maxWidth: 360, width: '100%', padding: 22 }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', letterSpacing: '0.08em' }}>
-              PRESÉNTALO EN EL COMEDOR
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-white/[0.07] pb-4">
+          <div>
+            <div className="mb-2 flex items-center gap-2">
+              <img src="/logo.png" alt="TicketCasino" className="h-7 w-7 rounded-md object-cover" />
+              <span className="text-base font-bold">
+                <span className="text-[#F1F5F9]">Ticket</span>
+                <span className="text-[#D97706]">Casino</span>
+              </span>
             </div>
-            <h3 style={{ fontSize: 20, margin: '6px 0 14px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-              {selectedTicket.type === 'ALMUERZO' ? (
-                <><Utensils size={18} /> Ticket de Almuerzo</>
-              ) : (
-                <><Coffee size={18} /> Ticket de Merienda</>
-              )}
+            <h2 className="text-lg font-extrabold text-[#F1F5F9]">¡Hola, {employee?.name?.split(' ')[0]}!</h2>
+            <p className="text-xs text-[#64748B]">@{employee?.username} · C.C. {employee?.document}</p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="secondary" size="icon" onClick={() => loadData(false)} title="Actualizar">
+              <RefreshCw size={14} />
+            </Button>
+            <Button variant="secondary" size="sm" onClick={handleLogout}>
+              <LogOut size={14} /> Salir
+            </Button>
+          </div>
+        </div>
+
+        {/* Section label */}
+        <p className="text-xs font-semibold uppercase tracking-widest text-[#475569]">
+          Tus Tickets Disponibles (Periodo Actual)
+        </p>
+
+        {/* Ticket cards */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Almuerzo */}
+          <Card className={`text-center ${almuerzos.length > 0 ? 'border-[#F59E0B]/30 bg-[#F59E0B]/5' : ''}`}>
+            <div className="flex justify-center mb-2">
+              <Utensils size={26} className="text-[#F59E0B]" />
+            </div>
+            <p className="text-xs font-semibold text-[#64748B]">ALMUERZOS</p>
+            <p className="text-3xl font-black text-[#F59E0B] my-1">{almuerzos.length}</p>
+            <Button
+              className="w-full mt-2" size="sm"
+              disabled={almuerzos.length === 0}
+              onClick={() => showTicketQR('ALMUERZO')}
+            >
+              <QrCode size={13} /> Mostrar QR
+            </Button>
+          </Card>
+
+          {/* Merienda */}
+          <Card className={`text-center ${meriendas.length > 0 ? 'border-amber-500/30 bg-amber-500/5' : ''}`}>
+            <div className="flex justify-center mb-2">
+              <Coffee size={26} className="text-amber-400" />
+            </div>
+            <p className="text-xs font-semibold text-[#64748B]">MERIENDAS</p>
+            <p className="text-3xl font-black text-amber-400 my-1">{meriendas.length}</p>
+            <Button
+              variant="secondary" className="w-full mt-2" size="sm"
+              disabled={meriendas.length === 0}
+              onClick={() => showTicketQR('MERIENDA')}
+            >
+              <QrCode size={13} /> Mostrar QR
+            </Button>
+          </Card>
+        </div>
+
+        {/* Historial reciente */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock size={14} className="text-[#64748B]" /> Tus últimos consumos
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {summary?.historialReciente?.length === 0 ? (
+              <p className="py-4 text-center text-sm text-[#475569]">Aún no has registrado consumos en este periodo.</p>
+            ) : (
+              <div className="space-y-2">
+                {summary?.historialReciente?.slice(0, 5).map((item) => (
+                  <div key={item.id}
+                    className="flex items-center justify-between rounded-lg bg-[#161B27] px-3 py-2.5 text-sm">
+                    <div className="flex items-center gap-2.5">
+                      {item.type === 'ALMUERZO' ? <Utensils size={13} className="text-[#64748B]" /> : <Coffee size={13} className="text-[#64748B]" />}
+                      <strong className="text-[#F1F5F9]">{item.type}</strong>
+                    </div>
+                    <span className="text-xs text-[#475569]">
+                      {item.usedAt ? new Date(item.usedAt).toLocaleString('es-CO') : 'Usado'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Modal QR */}
+      {selectedTicket && (
+        <Dialog open={!!selectedTicket} onOpenChange={(v) => !v && handleCloseModal()}>
+          <DialogContent className="max-w-xs text-center">
+            <p className="text-xs uppercase tracking-widest text-[#64748B]">Preséntalo en el comedor</p>
+            <h3 className="flex items-center justify-center gap-2 text-lg font-bold text-[#F1F5F9]">
+              {selectedTicket.type === 'ALMUERZO'
+                ? <><Utensils size={17} className="text-[#F59E0B]" /> Ticket de Almuerzo</>
+                : <><Coffee size={17} className="text-amber-400" /> Ticket de Merienda</>}
             </h3>
 
-            {/* Código QR generado localmente */}
-            <div
-              style={{
-                background: '#ffffff',
-                padding: 16,
-                borderRadius: 14,
-                display: 'inline-block',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-                marginBottom: 14,
-              }}
-            >
-              <QRCodeView
-                value={JSON.stringify({
-                  ticketId: selectedTicket.id,
-                  employeeId: employee.id,
-                })}
-                size={220}
-              />
+            <div className="flex justify-center">
+              <div className="rounded-2xl bg-white p-4 shadow-2xl">
+                <QRCodeView
+                  value={JSON.stringify({ ticketId: selectedTicket.id, employeeId: employee.id })}
+                  size={200}
+                />
+              </div>
             </div>
 
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 16 }}>
+            <div className="text-xs text-[#64748B]">
               <p>Acerca este código al lector del casino</p>
-              <p style={{ marginTop: 4, fontFamily: 'monospace', fontSize: 10 }}>
-                ID: {selectedTicket.id.slice(0, 14)}...
-              </p>
+              <p className="mt-1 font-mono text-[10px] text-[#475569]">ID: {selectedTicket.id.slice(0, 14)}…</p>
             </div>
 
-            <button
-              type="button"
-              className="btn btn-primary"
-              style={{ width: '100%', justifyContent: 'center' }}
-              onClick={handleCloseModal}
-            >
-              Listo / Cerrar
-            </button>
-          </div>
-        </div>
+            <Button className="w-full" onClick={handleCloseModal}>Listo / Cerrar</Button>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
 }
-

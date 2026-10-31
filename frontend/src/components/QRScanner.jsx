@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { BrowserMultiFormatReader } from '@zxing/browser';
 import { NotFoundException } from '@zxing/library';
 import { Camera, CameraOff, CheckCircle2, RefreshCw, X, ScanLine } from 'lucide-react';
+import { Button } from './ui/button';
 
 /**
  * QRScanner
@@ -98,33 +99,33 @@ export default function QRScanner({ onScan, onClose, successTicket, countdown, S
   const switchCamera = () => setActiveCamIdx((i) => (i + 1) % cameras.length);
 
   return (
+    /* Overlay a pantalla completa */
     <div
-      className="scanner-overlay"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
       role="dialog"
       aria-modal="true"
       aria-label="Escáner de código QR"
     >
-      <div className="scanner-box">
+      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#10141D] overflow-hidden shadow-2xl">
+
         {/* Header */}
-        <div className="scanner-header">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.07]">
           <div>
-            <h3 style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+            <h3 className="flex items-center gap-2 text-sm font-bold text-[#F1F5F9]">
               {successTicket ? (
-                <><CheckCircle2 size={18} color="#10B981" /> ¡Ticket escaneado!</>
+                <><CheckCircle2 size={17} className="text-emerald-400" /> ¡Ticket escaneado!</>
               ) : (
-                <><Camera size={18} /> Escanear Ticket QR</>
+                <><Camera size={17} className="text-[#F59E0B]" /> Escanear Ticket QR</>
               )}
             </h3>
-            <p>
-              {successTicket
-                ? 'Listo para el siguiente ticket'
-                : 'Apunta la cámara al código QR del empleado'}
+            <p className="text-xs text-[#64748B] mt-0.5">
+              {successTicket ? 'Listo para el siguiente ticket' : 'Apunta la cámara al código QR del empleado'}
             </p>
           </div>
           {!successTicket && (
             <button
               type="button"
-              className="btn btn-secondary btn-sm scanner-close"
+              className="rounded-lg p-1.5 text-[#64748B] hover:bg-white/5 hover:text-[#F1F5F9] transition-colors"
               onClick={onClose}
               aria-label="Cerrar escáner"
             >
@@ -134,21 +135,19 @@ export default function QRScanner({ onScan, onClose, successTicket, countdown, S
         </div>
 
         {/* Visor */}
-        <div className="scanner-viewport">
+        <div className="relative bg-black" style={{ aspectRatio: '4/3' }}>
           {error ? (
-            <div className="scanner-error">
-              <CameraOff size={38} color="var(--text-muted)" style={{ marginBottom: 8 }} />
-              <p>{error}</p>
-              <button type="button" className="btn btn-secondary btn-sm" style={{ marginTop: 12 }} onClick={onClose}>
-                Cerrar
-              </button>
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center">
+              <CameraOff size={38} className="text-[#64748B]" />
+              <p className="text-sm text-[#94A3B8]">{error}</p>
+              <Button variant="secondary" size="sm" onClick={onClose}>Cerrar</Button>
             </div>
           ) : (
             <>
               {/* Video siempre renderizado (oculto durante el éxito) */}
               <video
                 ref={videoRef}
-                className="scanner-video"
+                className="absolute inset-0 h-full w-full object-cover"
                 style={{ opacity: successTicket ? 0 : 1 }}
                 autoPlay
                 playsInline
@@ -158,16 +157,24 @@ export default function QRScanner({ onScan, onClose, successTicket, countdown, S
               {/* Marco guía — solo mientras escanea */}
               {!successTicket && ready && (
                 <>
-                  <div className="scanner-frame">
-                    <div className="scanner-corner tl" />
-                    <div className="scanner-corner tr" />
-                    <div className="scanner-corner bl" />
-                    <div className="scanner-corner br" />
-                    <div className="scanner-line" />
+                  {/* Frame corners */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="relative" style={{ width: '60%', aspectRatio: '1' }}>
+                      {/* Esquinas */}
+                      <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#F59E0B] rounded-tl-sm" />
+                      <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#F59E0B] rounded-tr-sm" />
+                      <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#F59E0B] rounded-bl-sm" />
+                      <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#F59E0B] rounded-br-sm" />
+                      {/* Línea de escaneo animada */}
+                      <div
+                        className="absolute left-1 right-1 h-0.5 bg-[#F59E0B]/70"
+                        style={{ animation: 'tc-scan 2s ease-in-out infinite', top: '50%' }}
+                      />
+                    </div>
                   </div>
-                  <div className="scanner-hint">
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                      <ScanLine size={15} /> Apunta al QR del ticket
+                  <div className="absolute bottom-3 left-0 right-0 flex justify-center">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1 text-xs text-[#94A3B8] backdrop-blur-sm">
+                      <ScanLine size={13} /> Apunta al QR del ticket
                     </span>
                   </div>
                 </>
@@ -183,22 +190,16 @@ export default function QRScanner({ onScan, onClose, successTicket, countdown, S
 
         {/* Controles */}
         {!error && !successTicket && cameras.length > 1 && (
-          <div className="scanner-controls">
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={switchCamera}
-              title="Cambiar cámara"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
-            >
-              <RefreshCw size={14} /> Cambiar cámara ({activeCamIdx + 1}/{cameras.length})
-            </button>
+          <div className="flex justify-center px-5 py-3 border-t border-white/[0.07]">
+            <Button variant="secondary" size="sm" onClick={switchCamera}>
+              <RefreshCw size={13} /> Cambiar cámara ({activeCamIdx + 1}/{cameras.length})
+            </Button>
           </div>
         )}
 
         {!error && !successTicket && cameras.length === 0 && (
-          <div className="scanner-loading">
-            <span>Accediendo a la cámara...</span>
+          <div className="flex items-center justify-center gap-2 px-5 py-3 text-xs text-[#64748B] border-t border-white/[0.07]">
+            <span className="spin inline-block">⏳</span> Accediendo a la cámara...
           </div>
         )}
       </div>
