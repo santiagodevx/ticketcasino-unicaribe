@@ -9,67 +9,76 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { TicketsService } from './tickets.service.js';
 import { GenerateTicketsDto } from './dto/generate-tickets.dto.js';
 import { ValidateTicketDto } from './dto/validate-ticket.dto.js';
 
+@ApiTags('Tiquetes')
+@ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard)
 @Controller('tickets')
 export class TicketsController {
   constructor(private readonly ticketsService: TicketsService) {}
 
-  // POST /tickets/generate — genera 15 tickets a un empleado
+  @ApiOperation({ summary: 'Generar tickets para un empleado específico' })
+  @ApiResponse({ status: 201, description: 'Tickets generados' })
+  @ApiResponse({ status: 404, description: 'Empleado no encontrado' })
   @Post('generate')
   generate(@Body() dto: GenerateTicketsDto) {
     return this.ticketsService.generate(dto);
   }
 
-  // POST /tickets/generate-all — genera tickets a todos los empleados activos
+  @ApiOperation({ summary: 'Generar tickets masivos de periodo para todos los empleados activos' })
+  @ApiResponse({ status: 201, description: 'Resumen de tickets creados' })
   @Post('generate-all')
   generateForAll() {
     return this.ticketsService.generateForAll();
   }
 
-  // POST /tickets/validate — valida QR (marca como USADO)
+  @ApiOperation({ summary: 'Validar y canjear un tiquete mediante código QR (Lector Casino)' })
+  @ApiResponse({ status: 200, description: 'Tiquete validado y marcado como USADO' })
+  @ApiResponse({ status: 400, description: 'Tiquete no corresponde, vencido o límite diario superado' })
+  @ApiResponse({ status: 404, description: 'Tiquete no encontrado' })
   @Post('validate')
   @HttpCode(HttpStatus.OK)
   validate(@Body() dto: ValidateTicketDto) {
     return this.ticketsService.validate(dto);
   }
 
-  // POST /tickets/redeem — alias de validate, para uso desde el portal del empleado
+  @ApiOperation({ summary: 'Canjear un tiquete (Alias de validación)' })
   @Post('redeem')
   @HttpCode(HttpStatus.OK)
   redeem(@Body() dto: ValidateTicketDto) {
     return this.ticketsService.validate(dto);
   }
 
-  // POST /tickets/expire — vence tickets expirados manualmente
+  @ApiOperation({ summary: 'Vencer tiquetes cuya fecha de expiración haya pasado' })
   @Post('expire')
   @HttpCode(HttpStatus.OK)
   expire() {
     return this.ticketsService.expireStale();
   }
 
-  // GET /tickets/my-summary — resumen del empleado autenticado (para el portal móvil)
+  @ApiOperation({ summary: 'Consultar resumen de tickets del empleado en sesión (App Móvil)' })
+  @ApiResponse({ status: 200, description: 'Contadores de tickets activos e historial' })
   @Get('my-summary')
   getMySummary(@Req() req: Request) {
     const employeeId = (req.user as any).userId;
     return this.ticketsService.getMySummary(employeeId);
   }
 
-  // GET /tickets/employee/:id/history — historial de consumos
+  @ApiOperation({ summary: 'Historial de consumos de un empleado' })
   @Get('employee/:id/history')
   getHistory(@Param('id') id: string) {
     return this.ticketsService.getHistory(id);
   }
 
-  // GET /tickets/employee/:id/active — tickets activos
+  @ApiOperation({ summary: 'Tickets activos disponibles de un empleado' })
   @Get('employee/:id/active')
   getActive(@Param('id') id: string) {
     return this.ticketsService.getActive(id);
   }
 }
-

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { TicketType, TicketStatus } from '@prisma/client';
+import dayjs from 'dayjs';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { GenerateTicketsDto } from './dto/generate-tickets.dto.js';
 import { ValidateTicketDto } from './dto/validate-ticket.dto.js';
@@ -58,15 +59,14 @@ export class TicketsService {
       };
     }
 
-    const now = new Date();
-    const expiresAt = new Date(now);
-    expiresAt.setDate(expiresAt.getDate() + PERIOD_DAYS);
+    const now = dayjs();
+    const expiresAt = now.add(PERIOD_DAYS, 'day').toDate();
 
     const data = Array.from({ length: toCreate }, () => ({
       type: dto.type,
       status: TicketStatus.ACTIVO,
       employeeId: dto.employeeId,
-      createdAt: now,
+      createdAt: now.toDate(),
       expiresAt,
     }));
 
@@ -95,10 +95,8 @@ export class TicketsService {
       throw new BadRequestException('No hay empleados activos');
     }
 
-    const now = new Date();
-    const expiresAt = new Date(now);
-    expiresAt.setDate(expiresAt.getDate() + PERIOD_DAYS);
-
+    const now = dayjs();
+    const expiresAt = now.add(PERIOD_DAYS, 'day').toDate();
     const types = [TicketType.ALMUERZO, TicketType.MERIENDA];
 
     // Cuenta los tickets vigentes de cada empleado+tipo en paralelo
@@ -119,7 +117,7 @@ export class TicketsService {
         type,
         status: TicketStatus.ACTIVO,
         employeeId,
-        createdAt: now,
+        createdAt: now.toDate(),
         expiresAt,
       }));
     });
@@ -145,27 +143,14 @@ export class TicketsService {
       where: { id: dto.ticketId },
     });
 
-    if (!ticket) {
-      throw new NotFoundException('Ticket no encontrado');
-    }
-
-    if (ticket.employeeId !== dto.employeeId) {
-      throw new BadRequestException('El ticket no pertenece a este empleado');
-    }
-
-    if (ticket.status === TicketStatus.USADO) {
-      throw new BadRequestException('El ticket ya fue utilizado');
-    }
-
-    if (ticket.status === TicketStatus.VENCIDO || ticket.expiresAt < new Date()) {
-      throw new BadRequestException('El ticket está vencido');
-    }
+    if (!ticket) throw new NotFoundException('Ticket no encontrado');
+    if (ticket.employeeId !== dto.employeeId) throw new BadRequestException('El ticket no pertenece a este empleado');
+    if (ticket.status === TicketStatus.USADO) throw new BadRequestException('El ticket ya fue utilizado');
+    if (ticket.status === TicketStatus.VENCIDO || ticket.expiresAt < new Date()) throw new BadRequestException('El ticket está vencido');
 
     // ── Restricción: máximo 1 ticket por tipo por día ──
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-    const todayEnd = new Date();
-    todayEnd.setHours(23, 59, 59, 999);
+    const todayStart = dayjs().startOf('day').toDate();
+    const todayEnd = dayjs().endOf('day').toDate();
 
     const alreadyUsedToday = await this.prisma.ticket.count({
       where: {
@@ -178,17 +163,12 @@ export class TicketsService {
 
     if (alreadyUsedToday > 0) {
       const typeLabel = ticket.type === 'ALMUERZO' ? 'almuerzo' : 'merienda';
-      throw new BadRequestException(
-        `Este empleado ya utilizó su ticket de ${typeLabel} hoy`,
-      );
+      throw new BadRequestException(`Este empleado ya utilizó su ticket de ${typeLabel} hoy`);
     }
 
     const used = await this.prisma.ticket.update({
       where: { id: dto.ticketId },
-      data: {
-        status: TicketStatus.USADO,
-        usedAt: new Date(),
-      },
+      data: { status: TicketStatus.USADO, usedAt: new Date() },
       select: {
         id: true,
         type: true,
@@ -206,12 +186,13 @@ export class TicketsService {
    * Usado por el portal móvil.
    */
   async getMySummary(employeeId: string) {
+    const now = new Date();
     const [almuerzosActivos, meriendасActivas, historialReciente] = await Promise.all([
       this.prisma.ticket.count({
-        where: { employeeId, type: TicketType.ALMUERZO, status: TicketStatus.ACTIVO, expiresAt: { gt: new Date() } },
+        where: { employeeId, type: TicketType.ALMUERZO, status: TicketStatus.ACTIVO, expiresAt: { gt: now } },
       }),
       this.prisma.ticket.count({
-        where: { employeeId, type: TicketType.MERIENDA, status: TicketStatus.ACTIVO, expiresAt: { gt: new Date() } },
+        where: { employeeId, type: TicketType.MERIENDA, status: TicketStatus.ACTIVO, expiresAt: { gt: now } },
       }),
       this.prisma.ticket.findMany({
         where: { employeeId, status: TicketStatus.USADO },
@@ -228,10 +209,7 @@ export class TicketsService {
    * Historial de consumos de un empleado (tickets USADO).
    */
   async getHistory(employeeId: string) {
-    const employee = await this.prisma.employee.findUnique({
-      where: { id: employeeId },
-    });
-
+    const employee = await this.prisma.employee.findUnique({ where: { id: employeeId } });
     if (!employee) throw new NotFoundException('Empleado no encontrado');
 
     return this.prisma.ticket.findMany({
@@ -261,10 +239,7 @@ export class TicketsService {
    */
   async expireStale() {
     const result = await this.prisma.ticket.updateMany({
-      where: {
-        status: TicketStatus.ACTIVO,
-        expiresAt: { lt: new Date() },
-      },
+      where: { status: TicketStatus.ACTIVO, expiresAt: { lt: new Date() } },
       data: { status: TicketStatus.VENCIDO },
     });
 
@@ -274,7 +249,7 @@ export class TicketsService {
   /**
    * Cron: genera 15 tickets de ALMUERZO y 15 de MERIENDA
    * para todos los empleados activos cada 15 días.
-   * Se ejecuta a las 6:00 AM cada 15 días (días 1 y 16 de cada mes).
+   * Se ejecuta a las 6:00 AM los días 1 y 16 de cada mes.
    */
   @Cron('0 6 1,16 * *')
   async scheduledGenerateForAll() {
@@ -294,4 +269,3 @@ export class TicketsService {
     }
   }
 }
-

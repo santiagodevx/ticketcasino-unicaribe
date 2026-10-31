@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { TicketStatus, TicketType } from '@prisma/client';
+import dayjs from 'dayjs';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()
@@ -65,8 +66,7 @@ export class AnalyticsService {
    * Consumos diarios del último mes, agrupados por tipo.
    */
   async daily() {
-    const since = new Date();
-    since.setDate(since.getDate() - 30);
+    const since = dayjs().subtract(30, 'day').toDate();
 
     const tickets = await this.prisma.ticket.findMany({
       where: {
