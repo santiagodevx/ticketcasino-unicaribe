@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { LayoutDashboard, Users, QrCode, LogOut, Menu, X } from 'lucide-react';
 
 const nav = [
-  { path: '/', label: 'Dashboard', icon: '📊' },
-  { path: '/employees', label: 'Empleados', icon: '👥' },
-  { path: '/validate', label: 'Validar QR', icon: '🎫' },
+  { path: '/', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
+  { path: '/employees', label: 'Empleados', icon: <Users size={18} /> },
+  { path: '/validate', label: 'Validar QR', icon: <QrCode size={18} /> },
 ];
 
 export default function Sidebar() {
@@ -54,21 +55,15 @@ export default function Sidebar() {
           onClick={() => setIsOpen(true)}
           aria-label="Abrir menú"
         >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
+          <Menu size={22} />
         </button>
 
-        <div className="mobile-brand">
-          <div className="brand-badge-wrap mobile-brand-badge">
-            <img src="/logo.png" alt="TicketCasino" className="mobile-brand-logo" />
-            <span className="brand-title">
-              <span className="brand-ticket">Ticket</span>
-              <span className="brand-casino">Casino</span>
-            </span>
-          </div>
+        <div className="brand-badge mobile-brand-badge">
+          <img src="/logo.png" alt="TicketCasino" className="brand-badge-logo" />
+          <span className="brand-title">
+            <span className="brand-ticket">Ticket</span>
+            <span className="brand-casino">Casino</span>
+          </span>
         </div>
 
         <button
@@ -78,7 +73,7 @@ export default function Sidebar() {
           title="Cerrar sesión"
           aria-label="Cerrar sesión"
         >
-          🚪
+          <LogOut size={18} />
         </button>
       </header>
 
@@ -94,15 +89,12 @@ export default function Sidebar() {
       {/* Sidebar (Desktop fixed sidebar / Mobile drawer) */}
       <aside className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>
         <div className="sidebar-brand">
-          <div className="sidebar-brand-info">
-            <div className="brand-badge-wrap">
-              <img src="/logo.png" alt="TicketCasino" className="brand-logo-img" />
-              <h1 className="brand-title">
-                <span className="brand-ticket">Ticket</span>
-                <span className="brand-casino">Casino</span>
-              </h1>
+          <div className="brand-badge">
+            <img src="/logo.png" alt="TicketCasino" className="brand-badge-logo" />
+            <div className="brand-title">
+              <span className="brand-ticket">Ticket</span>
+              <span className="brand-casino">Casino</span>
             </div>
-            <span>Panel de administración</span>
           </div>
           <button
             type="button"
@@ -110,7 +102,7 @@ export default function Sidebar() {
             onClick={() => setIsOpen(false)}
             aria-label="Cerrar menú"
           >
-            ✕
+            <X size={18} />
           </button>
         </div>
 
@@ -121,7 +113,7 @@ export default function Sidebar() {
               className={`nav-item ${pathname === item.path ? 'active' : ''}`}
               onClick={() => handleNav(item.path)}
             >
-              <span>{item.icon}</span>
+              <span className="nav-icon">{item.icon}</span>
               {item.label}
             </button>
           ))}
@@ -129,7 +121,7 @@ export default function Sidebar() {
 
         <div className="sidebar-footer">
           <button className="nav-item" onClick={logout}>
-            <span>🚪</span> Cerrar sesión
+            <span className="nav-icon"><LogOut size={18} /></span> Cerrar sesión
           </button>
         </div>
       </aside>

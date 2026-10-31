@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { RefreshCw, LogOut, Utensils, Coffee, QrCode, Clock } from 'lucide-react';
 import { api } from '../api';
 import { toast } from '../components/Toast';
 import QRCodeView from '../components/QRCodeView';
@@ -93,7 +94,7 @@ export default function EmployeePortalPage() {
         const stillActive = updated.tickets.some((t) => t.id === closedTicket.id);
         if (!stillActive) {
           const typeName = closedTicket.type === 'ALMUERZO' ? 'Almuerzo' : 'Merienda';
-          toast.ok(`✅ ¡Ticket de ${typeName} canjeado con éxito!`);
+          toast.ok(`¡Ticket de ${typeName} canjeado con éxito!`);
         }
       }
     }
@@ -129,9 +130,9 @@ export default function EmployeePortalPage() {
         }}
       >
         <div>
-          <div className="brand-badge-wrap portal-brand-badge" style={{ marginBottom: 8 }}>
-            <img src="/logo.png" alt="Logo" style={{ width: 22, height: 22, objectFit: 'contain' }} />
-            <span className="brand-title" style={{ fontSize: 14 }}>
+          <div className="brand-badge" style={{ marginBottom: 12 }}>
+            <img src="/logo.png" alt="TicketCasino" className="brand-badge-logo" />
+            <span className="brand-title">
               <span className="brand-ticket">Ticket</span>
               <span className="brand-casino">Casino</span>
             </span>
@@ -147,24 +148,24 @@ export default function EmployeePortalPage() {
             className="btn btn-secondary btn-sm"
             onClick={() => loadData(false)}
             title="Actualizar saldo"
-            style={{ padding: '6px 10px' }}
+            style={{ padding: '6px 10px', display: 'inline-flex', alignItems: 'center' }}
           >
-            🔄
+            <RefreshCw size={14} />
           </button>
           <button
             type="button"
             className="btn btn-secondary btn-sm"
             onClick={handleLogout}
             title="Cerrar sesión"
-            style={{ padding: '6px 12px' }}
+            style={{ padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: 6 }}
           >
-            🚪 Salir
+            <LogOut size={14} /> Salir
           </button>
         </div>
       </div>
 
       {/* Saldo de Tickets Disponibles */}
-      <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 12, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+      <h3 style={{ fontSize: 13, fontWeight: 700, marginBottom: 12, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
         Tus Tickets Disponibles (Periodo Actual)
       </h3>
 
@@ -174,22 +175,24 @@ export default function EmployeePortalPage() {
           className="card"
           style={{
             textAlign: 'center',
-            borderColor: almuerzos.length > 0 ? '#6366f160' : 'var(--border)',
-            background: almuerzos.length > 0 ? 'rgba(99, 102, 241, 0.08)' : 'var(--surface)',
+            borderColor: almuerzos.length > 0 ? 'rgba(245, 158, 11, 0.3)' : 'var(--border)',
+            background: almuerzos.length > 0 ? 'rgba(245, 158, 11, 0.05)' : 'var(--surface)',
           }}
         >
-          <div style={{ fontSize: 28, marginBottom: 4 }}>🍽</div>
+          <div style={{ marginBottom: 6, display: 'flex', justifyContent: 'center' }}>
+            <Utensils size={28} color="var(--primary)" />
+          </div>
           <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)' }}>ALMUERZOS</div>
           <div style={{ fontSize: 32, fontWeight: 800, color: 'var(--primary)', margin: '4px 0' }}>
             {almuerzos.length}
           </div>
           <button
             className="btn btn-primary btn-sm"
-            style={{ width: '100%', justifyContent: 'center', marginTop: 6 }}
+            style={{ width: '100%', justifyContent: 'center', marginTop: 6, display: 'inline-flex', alignItems: 'center', gap: 6 }}
             disabled={almuerzos.length === 0}
             onClick={() => showTicketQR('ALMUERZO')}
           >
-            📱 Mostrar QR
+            <QrCode size={14} /> Mostrar QR
           </button>
         </div>
 
@@ -198,30 +201,32 @@ export default function EmployeePortalPage() {
           className="card"
           style={{
             textAlign: 'center',
-            borderColor: meriendas.length > 0 ? '#f59e0b60' : 'var(--border)',
-            background: meriendas.length > 0 ? 'rgba(245, 158, 11, 0.08)' : 'var(--surface)',
+            borderColor: meriendas.length > 0 ? 'rgba(245, 158, 11, 0.3)' : 'var(--border)',
+            background: meriendas.length > 0 ? 'rgba(245, 158, 11, 0.05)' : 'var(--surface)',
           }}
         >
-          <div style={{ fontSize: 28, marginBottom: 4 }}>🥪</div>
+          <div style={{ marginBottom: 6, display: 'flex', justifyContent: 'center' }}>
+            <Coffee size={28} color="var(--warning)" />
+          </div>
           <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)' }}>MERIENDAS</div>
           <div style={{ fontSize: 32, fontWeight: 800, color: 'var(--warning)', margin: '4px 0' }}>
             {meriendas.length}
           </div>
           <button
             className="btn btn-secondary btn-sm"
-            style={{ width: '100%', justifyContent: 'center', marginTop: 6 }}
+            style={{ width: '100%', justifyContent: 'center', marginTop: 6, display: 'inline-flex', alignItems: 'center', gap: 6 }}
             disabled={meriendas.length === 0}
             onClick={() => showTicketQR('MERIENDA')}
           >
-            📱 Mostrar QR
+            <QrCode size={14} /> Mostrar QR
           </button>
         </div>
       </div>
 
       {/* Historial Reciente de Consumos */}
       <div className="card">
-        <h4 style={{ fontSize: 14, fontWeight: 700, marginBottom: 14 }}>
-          🕒 Tus últimos consumos
+        <h4 style={{ fontSize: 14, fontWeight: 700, marginBottom: 14, display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+          <Clock size={16} /> Tus últimos consumos
         </h4>
         {summary?.historialReciente?.length === 0 ? (
           <div className="empty" style={{ padding: '24px 10px' }}>
@@ -243,7 +248,9 @@ export default function EmployeePortalPage() {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span>{item.type === 'ALMUERZO' ? '🍽' : '🥪'}</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', opacity: 0.8 }}>
+                    {item.type === 'ALMUERZO' ? <Utensils size={14} /> : <Coffee size={14} />}
+                  </span>
                   <strong>{item.type}</strong>
                 </div>
                 <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>
@@ -266,8 +273,12 @@ export default function EmployeePortalPage() {
             <div style={{ fontSize: 12, color: 'var(--text-muted)', letterSpacing: '0.08em' }}>
               PRESÉNTALO EN EL COMEDOR
             </div>
-            <h3 style={{ fontSize: 20, margin: '6px 0 14px' }}>
-              {selectedTicket.type === 'ALMUERZO' ? '🍽 Ticket de Almuerzo' : '🥪 Ticket de Merienda'}
+            <h3 style={{ fontSize: 20, margin: '6px 0 14px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              {selectedTicket.type === 'ALMUERZO' ? (
+                <><Utensils size={18} /> Ticket de Almuerzo</>
+              ) : (
+                <><Coffee size={18} /> Ticket de Merienda</>
+              )}
             </h3>
 
             {/* Código QR generado localmente */}

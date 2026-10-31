@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Users, UserPlus, Ticket, Edit2 } from 'lucide-react';
 import { api } from '../api';
 import { toast } from '../components/Toast';
 
@@ -213,7 +214,21 @@ export default function EmployeesPage() {
   };
 
   useEffect(() => {
-    load();
+    let ignore = false;
+    const fetchList = async () => {
+      try {
+        const data = await api.getEmployees();
+        if (!ignore) setEmployees(data);
+      } catch (err) {
+        if (!ignore) toast.err(err.message);
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    };
+    fetchList();
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   const filtered = employees.filter(
@@ -233,12 +248,16 @@ export default function EmployeesPage() {
       <div className="flex-between toolbar-row">
         <input
           className="search-input"
-          placeholder="🔍 Buscar por nombre, usuario o cédula..."
+          placeholder="Buscar por nombre, usuario o cédula..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
-          + Nuevo empleado
+        <button
+          className="btn btn-primary"
+          onClick={() => setShowCreate(true)}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+        >
+          <UserPlus size={16} /> Nuevo empleado
         </button>
       </div>
 
@@ -247,7 +266,9 @@ export default function EmployeesPage() {
           <div className="loading">Cargando empleados...</div>
         ) : filtered.length === 0 ? (
           <div className="empty">
-            <div className="icon">👥</div>
+            <div className="icon">
+              <Users size={32} color="var(--text-muted)" />
+            </div>
             <p>
               {search
                 ? 'Sin resultados para tu búsqueda'
@@ -290,14 +311,16 @@ export default function EmployeesPage() {
                         <button
                           className="btn btn-secondary btn-sm"
                           onClick={() => navigate(`/employees/${emp.id}`)}
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}
                         >
-                          Ver tickets
+                          <Ticket size={13} /> Ver tickets
                         </button>
                         <button
                           className="btn btn-secondary btn-sm"
                           onClick={() => setEditing(emp)}
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}
                         >
-                          Editar
+                          <Edit2 size={13} /> Editar
                         </button>
                       </div>
                     </td>

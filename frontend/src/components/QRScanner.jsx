@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { BrowserMultiFormatReader } from '@zxing/browser';
 import { NotFoundException } from '@zxing/library';
+import { Camera, CameraOff, CheckCircle2, RefreshCw, X, ScanLine } from 'lucide-react';
 
 /**
  * QRScanner
@@ -107,7 +108,13 @@ export default function QRScanner({ onScan, onClose, successTicket, countdown, S
         {/* Header */}
         <div className="scanner-header">
           <div>
-            <h3>{successTicket ? '✅ ¡Ticket escaneado!' : '📷 Escanear Ticket QR'}</h3>
+            <h3 style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+              {successTicket ? (
+                <><CheckCircle2 size={18} color="#10B981" /> ¡Ticket escaneado!</>
+              ) : (
+                <><Camera size={18} /> Escanear Ticket QR</>
+              )}
+            </h3>
             <p>
               {successTicket
                 ? 'Listo para el siguiente ticket'
@@ -121,7 +128,7 @@ export default function QRScanner({ onScan, onClose, successTicket, countdown, S
               onClick={onClose}
               aria-label="Cerrar escáner"
             >
-              ✕
+              <X size={16} />
             </button>
           )}
         </div>
@@ -130,7 +137,7 @@ export default function QRScanner({ onScan, onClose, successTicket, countdown, S
         <div className="scanner-viewport">
           {error ? (
             <div className="scanner-error">
-              <span style={{ fontSize: 36 }}>📵</span>
+              <CameraOff size={38} color="var(--text-muted)" style={{ marginBottom: 8 }} />
               <p>{error}</p>
               <button type="button" className="btn btn-secondary btn-sm" style={{ marginTop: 12 }} onClick={onClose}>
                 Cerrar
@@ -159,7 +166,9 @@ export default function QRScanner({ onScan, onClose, successTicket, countdown, S
                     <div className="scanner-line" />
                   </div>
                   <div className="scanner-hint">
-                    <span>🔍 Apunta al QR del ticket</span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                      <ScanLine size={15} /> Apunta al QR del ticket
+                    </span>
                   </div>
                 </>
               )}
@@ -180,8 +189,9 @@ export default function QRScanner({ onScan, onClose, successTicket, countdown, S
               className="btn btn-secondary btn-sm"
               onClick={switchCamera}
               title="Cambiar cámara"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
             >
-              🔄 Cambiar cámara ({activeCamIdx + 1}/{cameras.length})
+              <RefreshCw size={14} /> Cambiar cámara ({activeCamIdx + 1}/{cameras.length})
             </button>
           </div>
         )}

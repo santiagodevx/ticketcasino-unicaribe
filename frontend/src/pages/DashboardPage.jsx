@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { PlusCircle, Loader2 } from 'lucide-react';
 import { api } from '../api';
 import { toast } from '../components/Toast';
 
@@ -78,7 +79,7 @@ export default function DashboardPage() {
     setGenerating(true);
     try {
       const res = await api.generateForAll();
-      toast.ok(`✅ ${res.ticketsCreated} tickets generados`);
+      toast.ok(`${res.ticketsCreated} tickets generados`);
       load();
     } catch (err) {
       toast.err(err.message);
@@ -99,8 +100,17 @@ export default function DashboardPage() {
           <h2>Dashboard</h2>
           <p>Resumen general del sistema de tickets</p>
         </div>
-        <button className="btn btn-primary" onClick={generateAll} disabled={generating}>
-          {generating ? '⏳ Generando...' : '🎫 Generar periodo'}
+        <button
+          className="btn btn-primary"
+          onClick={generateAll}
+          disabled={generating}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+        >
+          {generating ? (
+            <><Loader2 className="spin" size={16} /> Generando...</>
+          ) : (
+            <><PlusCircle size={16} /> Generar periodo</>
+          )}
         </button>
       </div>
 
@@ -142,7 +152,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="card">
-          <h3 style={{ marginBottom: 16, fontSize: 14, fontWeight: 700 }}>🏆 Top consumidores</h3>
+          <h3 style={{ marginBottom: 16, fontSize: 14, fontWeight: 700 }}>Top consumidores</h3>
           {top.length === 0 && <div className="empty"><p>Sin datos aún</p></div>}
           {top.map((item, i) => (
             <div key={item.employee?.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: i < top.length - 1 ? '1px solid var(--border)' : 'none' }}>

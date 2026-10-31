@@ -1,18 +1,23 @@
 import { useState, useCallback, useRef } from 'react';
+import { CheckCircle2, XCircle, Camera, Keyboard, ArrowLeft, Loader2, Utensils, Coffee } from 'lucide-react';
 import { api } from '../api';
 import { toast } from '../components/Toast';
 import QRScanner from '../components/QRScanner';
 
-const TYPE_LABEL = { ALMUERZO: '🍽 Almuerzo', MERIENDA: '🥪 Merienda' };
+const TYPE_LABEL = { ALMUERZO: 'Almuerzo', MERIENDA: 'Merienda' };
 
 /** Pantalla de éxito que se muestra sobre el escáner antes de autoreiniciarse */
 function ScanSuccess({ ticket, countdown }) {
+  const isAlmuerzo = ticket.type === 'ALMUERZO';
   return (
     <div className="scanner-success-overlay">
       <div className="scanner-success-box">
-        <div className="scanner-success-icon">✅</div>
+        <div className="scanner-success-icon">
+          <CheckCircle2 size={54} color="#10B981" />
+        </div>
         <h3>¡Ticket válido!</h3>
-        <p className="scanner-success-type">
+        <p className="scanner-success-type" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}>
+          {isAlmuerzo ? <Utensils size={15} /> : <Coffee size={15} />}
           {TYPE_LABEL[ticket.type] ?? ticket.type}
         </p>
         <p className="scanner-success-name">{ticket.employee?.name}</p>
@@ -74,7 +79,7 @@ export default function ValidatePage() {
       }
 
       const data = await api.validateTicket({ ticketId: tId, employeeId: eId });
-      toast.ok(`✅ ${TYPE_LABEL[data.ticket.type]} — ${data.ticket.employee?.name}`);
+      toast.ok(`${TYPE_LABEL[data.ticket.type]} — ${data.ticket.employee?.name}`);
       startCountdown(data.ticket);
     } catch (err) {
       // Error: cerrar el escáner y mostrar el error en la página
@@ -96,7 +101,7 @@ export default function ValidatePage() {
         ticketId: ticketId.trim(),
         employeeId: employeeId.trim(),
       });
-      toast.ok(`✅ ${TYPE_LABEL[data.ticket.type]} — ${data.ticket.employee?.name}`);
+      toast.ok(`${TYPE_LABEL[data.ticket.type]} — ${data.ticket.employee?.name}`);
       setTicketId('');
       setEmployeeId('');
       startCountdown(data.ticket);
@@ -132,7 +137,9 @@ export default function ValidatePage() {
         {/* ── Éxito (sin escáner abierto) ── */}
         {successTicket && !scanning && (
           <div className="validate-result ok validate-success-inline">
-            <div className="icon">✅</div>
+            <div className="icon">
+              <CheckCircle2 size={40} color="#10B981" />
+            </div>
             <h3>¡Ticket consumido!</h3>
             <p style={{ marginTop: 8, fontSize: 15 }}>
               <strong>{TYPE_LABEL[successTicket.type] ?? successTicket.type}</strong>
@@ -154,7 +161,9 @@ export default function ValidatePage() {
         {/* ── Error (permanente hasta que el admin lo descarte) ── */}
         {errorResult && (
           <div className="validate-result err">
-            <div className="icon">❌</div>
+            <div className="icon">
+              <XCircle size={40} color="#EF4444" />
+            </div>
             <h3>Ticket inválido</h3>
             <p>{errorResult}</p>
             <div className="validate-result-actions">
@@ -163,7 +172,7 @@ export default function ValidatePage() {
                 className="btn btn-primary"
                 onClick={() => { setErrorResult(null); setScanning(true); }}
               >
-                📷 Intentar de nuevo
+                <Camera size={16} /> Intentar de nuevo
               </button>
               <button
                 type="button"
@@ -183,7 +192,9 @@ export default function ValidatePage() {
             className="scan-trigger-btn"
             onClick={() => setScanning(true)}
           >
-            <span className="scan-trigger-icon">📷</span>
+            <span className="scan-trigger-icon">
+              <Camera size={40} strokeWidth={1.75} />
+            </span>
             <span className="scan-trigger-label">Presiona para escanear un ticket</span>
             <span className="scan-trigger-sub">
               Se abrirá la cámara para leer el código QR del empleado
@@ -193,7 +204,9 @@ export default function ValidatePage() {
 
         {/* Procesando... */}
         {loading && !scanning && (
-          <div className="loading">⏳ Procesando ticket...</div>
+          <div className="loading" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <Loader2 className="spin" size={18} /> Procesando ticket...
+          </div>
         )}
 
         {/* ── Toggle modo manual ── */}
@@ -203,8 +216,13 @@ export default function ValidatePage() {
               type="button"
               className="btn-text"
               onClick={() => setManualMode((m) => !m)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
             >
-              {manualMode ? '← Volver al escáner' : '⌨️ Ingresar ID manualmente'}
+              {manualMode ? (
+                <><ArrowLeft size={15} /> Volver al escáner</>
+              ) : (
+                <><Keyboard size={15} /> Ingresar ID manualmente</>
+              )}
             </button>
           </div>
         )}
@@ -235,8 +253,13 @@ export default function ValidatePage() {
                   type="submit"
                   className="btn btn-primary"
                   disabled={loading || !ticketId || !employeeId}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}
                 >
-                  {loading ? '⏳ Validando...' : '✅ Validar ticket'}
+                  {loading ? (
+                    <><Loader2 className="spin" size={16} /> Validando...</>
+                  ) : (
+                    <><CheckCircle2 size={16} /> Validar ticket</>
+                  )}
                 </button>
               </div>
             </form>

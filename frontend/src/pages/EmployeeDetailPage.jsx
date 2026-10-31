@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { ArrowLeft, Copy, Printer, Utensils, Coffee, QrCode, Ticket } from 'lucide-react';
 import { api } from '../api';
 import { toast } from '../components/Toast';
 import QRCodeView from '../components/QRCodeView';
@@ -42,8 +43,8 @@ function TicketModal({ ticket, employee, onClose }) {
           <div style={{ fontSize: 13, textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.1em' }}>
             TICKET DIGITAL CASINO
           </div>
-          <h2 style={{ fontSize: 22, marginTop: 4, color: isAlmuerzo ? 'var(--primary)' : '#f59e0b' }}>
-            {isAlmuerzo ? '🍽 ALMUERZO' : '🥪 MERIENDA'}
+          <h2 style={{ fontSize: 22, marginTop: 4, color: isAlmuerzo ? 'var(--primary)' : '#f59e0b', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+            {isAlmuerzo ? <><Utensils size={20} /> ALMUERZO</> : <><Coffee size={20} /> MERIENDA</>}
           </h2>
           <span className={`badge ${STATUS_CLASS[ticket.status]}`} style={{ marginTop: 6 }}>
             ● {ticket.status}
@@ -91,11 +92,11 @@ function TicketModal({ ticket, employee, onClose }) {
 
         {/* Acciones */}
         <div className="flex-gap" style={{ justifyContent: 'center' }}>
-          <button type="button" className="btn btn-secondary btn-sm" onClick={copyPayload}>
-            📋 Copiar datos QR
+          <button type="button" className="btn btn-secondary btn-sm" onClick={copyPayload} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <Copy size={14} /> Copiar datos QR
           </button>
-          <button type="button" className="btn btn-secondary btn-sm" onClick={printTicket}>
-            🖨 Imprimir
+          <button type="button" className="btn btn-secondary btn-sm" onClick={printTicket} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <Printer size={14} /> Imprimir
           </button>
           <button type="button" className="btn btn-primary btn-sm" onClick={onClose}>
             Listo
@@ -127,7 +128,26 @@ export default function EmployeeDetailPage() {
     }
   };
 
-  useEffect(() => { load(); }, [id]);
+  useEffect(() => {
+    let ignore = false;
+    const fetchEmp = async () => {
+      try {
+        const data = await api.getEmployee(id);
+        if (!ignore) setEmployee(data);
+      } catch (err) {
+        if (!ignore) {
+          toast.err(err.message);
+          navigate('/employees');
+        }
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    };
+    fetchEmp();
+    return () => {
+      ignore = true;
+    };
+  }, [id, navigate]);
 
   const generate = async (type) => {
     setGenerating(true);
@@ -152,7 +172,9 @@ export default function EmployeeDetailPage() {
 
   return (
     <div>
-      <button className="btn btn-secondary btn-sm" style={{ marginBottom: 20 }} onClick={() => navigate('/employees')}>← Volver</button>
+      <button className="btn btn-secondary btn-sm" style={{ marginBottom: 20, display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={() => navigate('/employees')}>
+        <ArrowLeft size={14} /> Volver
+      </button>
 
       <div className="flex-between page-header">
         <div>
@@ -160,8 +182,12 @@ export default function EmployeeDetailPage() {
           <p>Doc: {employee.document} &nbsp;·&nbsp; <span className={`badge ${employee.active ? 'green' : 'red'}`}>{employee.active ? '● Activo' : '● Inactivo'}</span></p>
         </div>
         <div className="flex-gap page-header-actions">
-          <button className="btn btn-secondary btn-sm" onClick={() => generate('ALMUERZO')} disabled={generating}>🍽 Generar almuerzos</button>
-          <button className="btn btn-secondary btn-sm" onClick={() => generate('MERIENDA')} disabled={generating}>🥪 Generar meriendas</button>
+          <button className="btn btn-secondary btn-sm" onClick={() => generate('ALMUERZO')} disabled={generating} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <Utensils size={14} /> Generar almuerzos
+          </button>
+          <button className="btn btn-secondary btn-sm" onClick={() => generate('MERIENDA')} disabled={generating} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <Coffee size={14} /> Generar meriendas
+          </button>
         </div>
       </div>
 
@@ -179,7 +205,7 @@ export default function EmployeeDetailPage() {
         </div>
 
         {displayed.length === 0 ? (
-          <div className="empty"><div className="icon">🎫</div><p>Sin tickets en esta categoría</p></div>
+          <div className="empty"><div className="icon"><Ticket size={32} /></div><p>Sin tickets en esta categoría</p></div>
         ) : (
           <div className="table-wrap">
             <table>
@@ -208,8 +234,9 @@ export default function EmployeeDetailPage() {
                         <button
                           className="btn btn-primary btn-sm"
                           onClick={() => setSelectedTicket(t)}
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
                         >
-                          📱 Ver QR
+                          <QrCode size={13} /> Ver QR
                         </button>
                       ) : (
                         <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>—</span>

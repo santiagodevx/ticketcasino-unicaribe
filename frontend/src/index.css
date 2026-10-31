@@ -5,24 +5,24 @@
 }
 
 :root {
-  --bg: #0c0e14;
-  --surface: #171B24;
-  --surface2: #1f2430;
-  --surface-hover: #262c3b;
-  --border: #282e3d;
-  --border-gold: rgba(255, 184, 0, 0.35);
-  --primary: #FFB800;
-  --primary-hover: #FF9F00;
-  --primary-light: #FFD66B;
-  --primary-glow: rgba(255, 184, 0, 0.28);
-  --crema: #FFF9ED;
-  --success: #10b981;
-  --warning: #FF9F00;
-  --danger: #ef4444;
-  --text: #f8fafc;
-  --text-muted: #94a3b8;
+  --bg: #090B10;
+  --surface: #10141D;
+  --surface2: #161B26;
+  --surface-hover: #1E2433;
+  --border: #1E2536;
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --primary: #F59E0B;
+  --primary-hover: #D97706;
+  --primary-subtle: rgba(245, 158, 11, 0.12);
+  --crema: #FFFFFF;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --text: #F8FAFC;
+  --text-muted: #8E9BAE;
+  --text-dim: #64748B;
   --radius: 10px;
-  --sidebar-w: 230px;
+  --sidebar-w: 240px;
   --header-h: 58px;
 }
 
@@ -79,109 +79,99 @@ a {
 }
 
 .sidebar-brand {
-  padding: 18px 16px 14px;
+  padding: 16px 14px;
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-/* ── Brand Styling (Inspirado en el logo oficial: fondo crema, Ticket negro, Casino amarillo) ── */
-.brand-badge-wrap {
-  background: var(--crema);
-  border-radius: 12px;
+/* ── Brand Badge (Limpio, estético, fondo blanco puro, Ticket negro y Casino amarillo) ── */
+.brand-badge {
+  background: #FFFFFF;
+  border-radius: 9px;
   padding: 6px 12px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 184, 0, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-.login-brand-card {
-  background: var(--crema);
-  border-radius: 22px;
-  padding: 22px 34px 18px;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  margin: 0 auto;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 184, 0, 0.3);
-}
-
-.brand-logo-img {
-  width: 32px;
-  height: 24px;
+.brand-badge-logo {
+  height: 26px;
+  width: auto;
+  max-width: 32px;
   object-fit: contain;
   flex-shrink: 0;
-}
-
-.mobile-brand-logo {
-  width: 28px;
-  height: 20px;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-
-.login-logo-img {
-  width: 130px;
-  height: 84px;
-  object-fit: contain;
   display: block;
 }
 
 .brand-title {
   display: inline-flex;
-  align-items: center;
+  align-items: baseline;
   font-family: inherit;
-  font-weight: 800;
+  font-weight: 850;
   line-height: 1;
   font-size: 16px;
+  white-space: nowrap;
 }
 
 .brand-ticket {
-  color: #171B24;
-  font-weight: 800;
+  color: #0F172A;
+  font-weight: 850;
   letter-spacing: -0.02em;
 }
 
 .brand-casino {
-  color: #FFB800;
-  font-weight: 800;
+  color: #D97706;
+  font-weight: 850;
   letter-spacing: -0.01em;
 }
 
-.login-brand-title {
-  font-size: 30px;
-  justify-content: center;
+.login-brand-card {
+  background: #FFFFFF;
+  border-radius: 18px;
+  padding: 22px 32px 18px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: 0 auto;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
 }
 
-.sidebar-brand-info span {
-  font-size: 11px;
-  color: var(--text-muted);
+.login-logo-img {
+  width: auto;
+  height: 76px;
+  max-width: 120px;
+  object-fit: contain;
   display: block;
-  margin-top: 6px;
+}
+
+.login-brand-title {
+  font-size: 28px;
+  justify-content: center;
 }
 
 .sidebar-nav {
   flex: 1;
-  padding: 12px 8px;
+  padding: 14px 10px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   overflow-y: auto;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: var(--radius);
+  gap: 11px;
+  padding: 9px 12px;
+  border-radius: 8px;
   color: var(--text-muted);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.15s ease;
   font-weight: 500;
   font-size: 13.5px;
   border: none;
@@ -189,7 +179,7 @@ a {
   width: 100%;
   text-align: left;
   font-family: inherit;
-  min-height: 40px;
+  min-height: 38px;
 }
 
 .nav-item:hover {
@@ -198,18 +188,26 @@ a {
 }
 
 .nav-item.active {
-  background: rgba(255, 184, 0, 0.12);
+  background: var(--primary-subtle);
   color: var(--primary);
   font-weight: 600;
-  border-left: 3px solid var(--primary);
 }
 
-.nav-item svg {
+.nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.nav-item.active .nav-icon {
+  opacity: 1;
+  color: var(--primary);
 }
 
 .sidebar-footer {
-  padding: 12px 8px;
+  padding: 12px 10px;
   border-top: 1px solid var(--border);
 }
 
@@ -413,20 +411,19 @@ input::placeholder {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #FFB800 0%, #FF9F00 100%);
-  color: #171B24;
-  font-weight: 700;
-  box-shadow: 0 4px 14px rgba(255, 184, 0, 0.28);
+  background: var(--primary);
+  color: #090B10;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
   border: none;
 }
 .btn-primary:hover {
-  background: linear-gradient(135deg, #FFD66B 0%, #FFB800 100%);
-  box-shadow: 0 6px 20px rgba(255, 184, 0, 0.4);
+  background: var(--primary-hover);
+  color: #090B10;
   transform: translateY(-1px);
-  color: #171B24;
 }
 .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
-.btn-secondary:hover { background: var(--surface-hover); border-color: rgba(255, 184, 0, 0.4); }
+.btn-secondary:hover { background: var(--surface-hover); border-color: rgba(255, 255, 255, 0.15); }
 .btn-danger { background: #ef444418; color: var(--danger); border: 1px solid #ef444430; }
 .btn-danger:hover { background: #ef444430; }
 .btn-success { background: #22c55e18; color: var(--success); border: 1px solid #22c55e30; }
@@ -828,20 +825,9 @@ input::placeholder {
     background: var(--surface2);
   }
 
-  .mobile-brand {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 700;
-    font-size: 16px;
-  }
-
-  .mobile-brand-icon {
-    font-size: 20px;
-  }
-
-  .mobile-brand-title {
-    color: var(--text);
+  .mobile-brand-badge {
+    padding: 5px 10px;
+    border-radius: 8px;
   }
 
   .mobile-logout-btn {
@@ -1513,5 +1499,18 @@ input::placeholder {
   .portal-container {
     max-width: 740px;
     padding: 48px 32px;
+  }
+}
+
+.spin {
+  animation: tc-spin 1s linear infinite;
+}
+
+@keyframes tc-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }

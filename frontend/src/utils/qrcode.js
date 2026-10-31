@@ -260,7 +260,7 @@ export class QRCodeModel {
     this.modules[this.moduleCount - 8][8] = !test;
   }
 
-  mapData(data, maskPattern) {
+  mapData(data) {
     let inc = -1;
     let row = this.moduleCount - 1;
     let bitIndex = 7;

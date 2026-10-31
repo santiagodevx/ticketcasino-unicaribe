@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Smartphone, Shield, LogIn, Loader2 } from 'lucide-react';
 import { api } from '../api';
 import { toast } from '../components/Toast';
 
@@ -78,18 +79,18 @@ export default function LoginPage() {
           <button
             type="button"
             className={`tab ${mode === 'employee' ? 'active' : ''}`}
-            style={{ flex: 1, textAlign: 'center', padding: '10px' }}
+            style={{ flex: 1, textAlign: 'center', padding: '10px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}
             onClick={() => setMode('employee')}
           >
-            📱 Soy Empleado
+            <Smartphone size={16} /> Empleado
           </button>
           <button
             type="button"
             className={`tab ${mode === 'admin' ? 'active' : ''}`}
-            style={{ flex: 1, textAlign: 'center', padding: '10px' }}
+            style={{ flex: 1, textAlign: 'center', padding: '10px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}
             onClick={() => setMode('admin')}
           >
-            🛡️ Administrador
+            <Shield size={16} /> Administrador
           </button>
         </div>
 
@@ -137,10 +138,17 @@ export default function LoginPage() {
                 marginTop: 10,
                 padding: '12px',
                 fontSize: 14,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 7,
               }}
               disabled={loading}
             >
-              {loading ? 'Verificando...' : '📱 Entrar a Mis Tickets'}
+              {loading ? (
+                <><Loader2 className="spin" size={16} /> Verificando...</>
+              ) : (
+                <><LogIn size={16} /> Entrar a Mis Tickets</>
+              )}
             </button>
           </form>
         ) : (
@@ -179,10 +187,14 @@ export default function LoginPage() {
             <button
               type="submit"
               className="btn btn-primary"
-              style={{ width: '100%', justifyContent: 'center', marginTop: 8 }}
+              style={{ width: '100%', justifyContent: 'center', marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 7 }}
               disabled={loading}
             >
-              {loading ? 'Ingresando...' : 'Iniciar Sesión'}
+              {loading ? (
+                <><Loader2 className="spin" size={16} /> Ingresando...</>
+              ) : (
+                <><LogIn size={16} /> Iniciar Sesión</>
+              )}
             </button>
           </form>
         )}
