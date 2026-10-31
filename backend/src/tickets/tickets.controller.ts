@@ -4,10 +4,12 @@ import {
   Get,
   Param,
   Body,
+  Req,
   UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { TicketsService } from './tickets.service.js';
 import { GenerateTicketsDto } from './dto/generate-tickets.dto.js';
@@ -37,11 +39,25 @@ export class TicketsController {
     return this.ticketsService.validate(dto);
   }
 
-  // POST /tickets/expire — vence tickets expirados
+  // POST /tickets/redeem — alias de validate, para uso desde el portal del empleado
+  @Post('redeem')
+  @HttpCode(HttpStatus.OK)
+  redeem(@Body() dto: ValidateTicketDto) {
+    return this.ticketsService.validate(dto);
+  }
+
+  // POST /tickets/expire — vence tickets expirados manualmente
   @Post('expire')
   @HttpCode(HttpStatus.OK)
   expire() {
     return this.ticketsService.expireStale();
+  }
+
+  // GET /tickets/my-summary — resumen del empleado autenticado (para el portal móvil)
+  @Get('my-summary')
+  getMySummary(@Req() req: Request) {
+    const employeeId = (req.user as any).userId;
+    return this.ticketsService.getMySummary(employeeId);
   }
 
   // GET /tickets/employee/:id/history — historial de consumos

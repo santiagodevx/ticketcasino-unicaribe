@@ -7,6 +7,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { LoginDto } from './dto/login.dto.js';
+import { EmployeeLoginDto } from './dto/employee-login.dto.js';
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()
@@ -56,10 +57,53 @@ export class AuthService implements OnApplicationBootstrap {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    const payload = { sub: user.id, username: user.username };
+    const payload = { sub: user.id, username: user.username, role: 'ADMIN' };
     const token = this.jwt.sign(payload);
 
-    return { access_token: token };
+    return { access_token: token, role: 'ADMIN' };
+  }
+
+  async employeeLogin(dto: EmployeeLoginDto) {
+    const term = dto.username.trim();
+
+    // Permite iniciar sesión con username o documento
+    const employee = await this.prisma.employee.findFirst({
+      where: {
+        OR: [{ username: term }, { document: term }],
+      },
+    });
+
+    if (!employee) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    if (!employee.active) {
+      throw new UnauthorizedException('El empleado se encuentra inactivo');
+    }
+
+    const valid = await bcrypt.compare(dto.password, employee.password);
+    if (!valid) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    const payload = {
+      sub: employee.id,
+      document: employee.document,
+      username: employee.username,
+      name: employee.name,
+      role: 'EMPLOYEE',
+    };
+    const token = this.jwt.sign(payload);
+
+    return {
+      access_token: token,
+      role: 'EMPLOYEE',
+      employee: {
+        id: employee.id,
+        name: employee.name,
+        username: employee.username,
+        document: employee.document,
+      },
+    };
   }
 }
-

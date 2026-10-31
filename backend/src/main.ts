@@ -8,9 +8,9 @@ async function bootstrap() {
   // Validación global de DTOs
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,       // Ignora campos no declarados en el DTO
+      whitelist: true, // Ignora campos no declarados en el DTO
       forbidNonWhitelisted: true,
-      transform: true,       // Convierte tipos automáticamente
+      transform: true, // Convierte tipos automáticamente
     }),
   );
 

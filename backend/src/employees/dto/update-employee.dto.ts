@@ -5,8 +5,15 @@ export class UpdateEmployeeDto {
   @IsOptional()
   name?: string;
 
+  @IsString()
+  @IsOptional()
+  username?: string;
+
+  @IsString()
+  @IsOptional()
+  password?: string;
+
   @IsBoolean()
   @IsOptional()
   active?: boolean;
 }
-

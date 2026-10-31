@@ -6,11 +6,13 @@ import {
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateEmployeeDto } from './dto/create-employee.dto.js';
 import { UpdateEmployeeDto } from './dto/update-employee.dto.js';
+import * as bcrypt from 'bcryptjs';
 
 const EMPLOYEE_SELECT = {
   id: true,
   document: true,
   name: true,
+  username: true,
   active: true,
   createdAt: true,
 } as const;
@@ -20,16 +22,32 @@ export class EmployeesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateEmployeeDto) {
-    const exists = await this.prisma.employee.findUnique({
-      where: { document: dto.document },
-    });
+    const [existingDoc, existingUser] = await Promise.all([
+      this.prisma.employee.findUnique({
+        where: { document: dto.document.trim() },
+      }),
+      this.prisma.employee.findUnique({
+        where: { username: dto.username.trim() },
+      }),
+    ]);
 
-    if (exists) {
+    if (existingDoc) {
       throw new ConflictException('Ya existe un empleado con ese documento');
     }
 
+    if (existingUser) {
+      throw new ConflictException('Ese nombre de usuario ya está en uso');
+    }
+
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+
     return this.prisma.employee.create({
-      data: dto,
+      data: {
+        document: dto.document.trim(),
+        name: dto.name.trim(),
+        username: dto.username.trim(),
+        password: hashedPassword,
+      },
       select: EMPLOYEE_SELECT,
     });
   }
@@ -70,9 +88,28 @@ export class EmployeesService {
   async update(id: string, dto: UpdateEmployeeDto) {
     await this.findOne(id);
 
+    const data: Record<string, any> = {};
+
+    if (dto.name !== undefined) data.name = dto.name.trim();
+    if (dto.active !== undefined) data.active = dto.active;
+
+    if (dto.username !== undefined) {
+      const existing = await this.prisma.employee.findUnique({
+        where: { username: dto.username.trim() },
+      });
+      if (existing && existing.id !== id) {
+        throw new ConflictException('Ese nombre de usuario ya está en uso');
+      }
+      data.username = dto.username.trim();
+    }
+
+    if (dto.password) {
+      data.password = await bcrypt.hash(dto.password, 10);
+    }
+
     return this.prisma.employee.update({
       where: { id },
-      data: dto,
+      data,
       select: EMPLOYEE_SELECT,
     });
   }
@@ -88,4 +125,3 @@ export class EmployeesService {
     });
   }
 }
-

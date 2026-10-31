@@ -36,6 +36,8 @@ model Employee {
   document  String   @unique
   name      String
   active    Boolean  @default(true)
+  username  String   @unique
+  password  String
   passkey   Json?
   createdAt DateTime @default(now())
   tickets   Ticket[]
