@@ -35,8 +35,11 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      args:
+        - DATABASE_URL=mysql://${MYSQL_USER:-casino_user}:${MYSQL_PASSWORD:-casino_pass_2026}@db:3306/${MYSQL_DATABASE:-ticketcasino_db}
     container_name: ticketcasino_backend
     restart: always
+
     environment:
       DATABASE_URL: mysql://${MYSQL_USER:-casino_user}:${MYSQL_PASSWORD:-casino_pass_2026}@db:3306/${MYSQL_DATABASE:-ticketcasino_db}
       JWT_SECRET: ${JWT_SECRET:-super_secret_jwt_ticketcasino_2026_changeme}
