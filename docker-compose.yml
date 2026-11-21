@@ -4,6 +4,8 @@ services:
     image: mysql:8.0
     container_name: ticketcasino_db
     restart: always
+    ports:
+      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-tc_root_2026}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-ticketcasino_db}
