@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module.js';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,9 +16,11 @@ async function bootstrap() {
     }),
   );
 
+  const config = app.get(ConfigService);
+
   // CORS para el frontend
   app.enableCors({
-    origin: process.env.FRONTEND_URL ?? 'http://localhost:5173',
+    origin: config.getOrThrow('FRONTEND_URL'),
     credentials: true,
   });
 
@@ -32,7 +35,7 @@ async function bootstrap() {
     .setTitle('TicketCasino API')
     .setDescription(
       'Documentación interactiva de los endpoints de TicketCasino — ' +
-      'Sistema Digital de Gestión y Validación de Tiquetes de Alimentación.',
+        'Sistema Digital de Gestión y Validación de Tiquetes de Alimentación.',
     )
     .setVersion('1.0')
     .addBearerAuth(
@@ -40,7 +43,8 @@ async function bootstrap() {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
-        description: 'Ingresa el token JWT obtenido tras iniciar sesión en /api/auth/login',
+        description:
+          'Ingresa el token JWT obtenido tras iniciar sesión en /api/auth/login',
         in: 'header',
       },
       'JWT-auth',
@@ -56,10 +60,12 @@ async function bootstrap() {
   });
   // ─────────────────────────────────────────────────────────────────────────
 
-  const port = process.env.PORT ?? 3000;
+  const port = config.getOrThrow('PORT');
   await app.listen(port);
   console.log(`🚀 Backend corriendo en http://localhost:${port}/api`);
-  console.log(`📚 Swagger UI disponible en http://localhost:${port}/api/api-docs`);
+  console.log(
+    `📚 Swagger UI disponible en http://localhost:${port}/api/api-docs`,
+  );
 }
 
 await bootstrap();

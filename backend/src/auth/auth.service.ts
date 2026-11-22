@@ -9,6 +9,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { LoginDto } from './dto/login.dto.js';
 import { EmployeeLoginDto } from './dto/employee-login.dto.js';
 import * as bcrypt from 'bcryptjs';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService implements OnApplicationBootstrap {
@@ -17,6 +18,7 @@ export class AuthService implements OnApplicationBootstrap {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
   async onApplicationBootstrap() {
@@ -24,8 +26,10 @@ export class AuthService implements OnApplicationBootstrap {
   }
 
   private async ensureAdminExists() {
-    const adminUsername = process.env.DEFAULT_ADMIN_USER || 'admin';
-    const adminPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'admin_password_123';
+    const adminUsername = this.configService.getOrThrow('DEFAULT_ADMIN_USER');
+    const adminPassword = this.configService.getOrThrow(
+      'DEFAULT_ADMIN_PASSWORD',
+    );
 
     const adminUser = await this.prisma.user.findUnique({
       where: { username: adminUsername },
