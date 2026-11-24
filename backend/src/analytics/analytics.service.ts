@@ -78,7 +78,10 @@ export class AnalyticsService {
     });
 
     // Agrupa por fecha + tipo en memoria
-    const map = new Map<string, { date: string; ALMUERZO: number; MERIENDA: number }>();
+    const map = new Map<
+      string,
+      { date: string; ALMUERZO: number; MERIENDA: number }
+    >();
 
     for (const t of tickets) {
       const date = t.usedAt!.toISOString().slice(0, 10);
@@ -90,5 +93,35 @@ export class AnalyticsService {
 
     return Array.from(map.values());
   }
-}
 
+  async today() {
+    const tickets = await this.prisma.ticket.findMany({
+      where: {
+        status: TicketStatus.USADO,
+        usedAt: {
+          gte: dayjs().startOf('day').toDate(),
+          lte: dayjs().endOf('day').toDate(),
+        },
+      },
+      select: {
+        id: true,
+        type: true,
+        usedAt: true,
+        employee: {
+          select: { id: true, name: true, document: true, username: true },
+        },
+      },
+      orderBy: { usedAt: 'desc' },
+    });
+
+    const countByType = (type: TicketType) =>
+      tickets.filter((t) => t.type === type).length;
+
+    return {
+      total: tickets.length,
+      almuerzos: countByType(TicketType.ALMUERZO),
+      meriendas: countByType(TicketType.MERIENDA),
+      items: tickets,
+    };
+  }
+}
