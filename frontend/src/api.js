@@ -45,6 +45,10 @@ export const api = {
   getEmployee: (id) => apiClient.get(`/employees/${id}`),
   createEmployee: (body) => apiClient.post('/employees', body),
   updateEmployee: (id, body) => apiClient.patch(`/employees/${id}`, body),
+  importEmployeesCsv: (formData) =>
+    apiClient.post('/employees/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
 
   // Tickets
   generateForAll: () => apiClient.post('/tickets/generate-all'),
