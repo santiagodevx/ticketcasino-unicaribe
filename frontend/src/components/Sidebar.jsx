@@ -147,9 +147,6 @@ export default function Sidebar() {
           </button>
         </div>
       </aside>
-
-      {/* Mobile spacer so content doesn't hide behind topbar */}
-      <div className="h-14 md:hidden" />
     </>
   );
 }
