@@ -508,39 +508,54 @@ export default function EmployeesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h2 className="text-xl font-bold text-[#F1F5F9]">Empleados</h2>
-        <p className="text-sm text-[#64748B]">
-          Gestión del personal y sus credenciales de acceso
-        </p>
-      </div>
+      {/* Header & Actions */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-bold text-[#F1F5F9]">Empleados</h2>
+          <p className="text-sm text-[#64748B]">
+            Gestión del personal y sus credenciales de acceso
+          </p>
+        </div>
 
-      {/* Toolbar */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <Input
-          className="sm:max-w-xs"
-          placeholder="Buscar por nombre, usuario o cédula..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <div className="flex items-center gap-2">
-          <Button variant="secondary" onClick={() => setShowImport(true)}>
-            <Upload size={15} /> Importar CSV
+        {/* Action Buttons */}
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2.5">
+          <Button
+            variant="secondary"
+            className="w-full sm:w-auto h-10 px-3.5 justify-center font-medium shadow-sm hover:border-white/20"
+            onClick={() => setShowImport(true)}
+          >
+            <Upload size={16} className="text-[#F59E0B]" />
+            <span className="truncate">Importar CSV</span>
           </Button>
-          <Button onClick={() => setShowCreate(true)}>
-            <UserPlus size={15} /> Nuevo empleado
+          <Button
+            className="w-full sm:w-auto h-10 px-4 justify-center font-semibold shadow-sm shadow-[#F59E0B]/10 hover:shadow-[#F59E0B]/20"
+            onClick={() => setShowCreate(true)}
+          >
+            <UserPlus size={16} />
+            <span className="truncate">Nuevo empleado</span>
           </Button>
         </div>
       </div>
 
-      {/* Table */}
-      <Card className="p-0 overflow-hidden">
-        {loading ? (
+      {/* Search Toolbar */}
+      <div className="relative">
+        <Input
+          className="w-full sm:max-w-md h-10 bg-[#10141D] border-white/[0.08] focus:border-[#F59E0B]/50 pl-3.5"
+          placeholder="Buscar por nombre, usuario o cédula..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
+
+      {/* Employees list */}
+      {loading ? (
+        <Card className="p-0 overflow-hidden">
           <div className="flex items-center justify-center gap-3 py-16 text-[#64748B]">
             <Loader2 size={18} className="spin" /> Cargando empleados...
           </div>
-        ) : filtered.length === 0 ? (
+        </Card>
+      ) : filtered.length === 0 ? (
+        <Card className="p-0 overflow-hidden">
           <div className="flex flex-col items-center justify-center gap-3 py-16 text-[#64748B]">
             <Users size={36} strokeWidth={1.5} />
             <p className="text-sm">
@@ -549,67 +564,123 @@ export default function EmployeesPage() {
                 : "No hay empleados registrados aún"}
             </p>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-white/[0.07] text-xs text-[#64748B] uppercase tracking-wider">
-                  <th className="px-5 py-3 text-left font-medium">Nombre</th>
-                  <th className="px-5 py-3 text-left font-medium">Usuario</th>
-                  <th className="px-5 py-3 text-left font-medium">Documento</th>
-                  <th className="px-5 py-3 text-left font-medium">Estado</th>
-                  <th className="px-5 py-3 text-left font-medium">Creado</th>
-                  <th className="px-5 py-3 text-right font-medium">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/[0.04]">
-                {filtered.map((emp) => (
-                  <tr
-                    key={emp.id}
-                    className="hover:bg-white/[0.02] transition-colors"
-                  >
-                    <td className="px-5 py-3 font-semibold text-[#F1F5F9]">
+        </Card>
+      ) : (
+        <>
+          {/* Vista móvil: Cards compactas para evitar desborde de pantalla */}
+          <div className="space-y-3 md:hidden">
+            {filtered.map((emp) => (
+              <Card key={emp.id} className="p-4 space-y-3 border-white/[0.07]">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-[#F1F5F9] truncate">
                       {emp.name}
-                    </td>
-                    <td className="px-5 py-3 font-mono text-[#F59E0B] text-xs">
-                      @{emp.username}
-                    </td>
-                    <td className="px-5 py-3 font-mono text-[#64748B] text-xs">
-                      {emp.document}
-                    </td>
-                    <td className="px-5 py-3">
-                      <Badge variant={emp.active ? "success" : "danger"}>
-                        {emp.active ? "● Activo" : "● Inactivo"}
-                      </Badge>
-                    </td>
-                    <td className="px-5 py-3 text-[#64748B] text-xs">
-                      {new Date(emp.createdAt).toLocaleDateString("es-CO")}
-                    </td>
-                    <td className="px-5 py-3">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => navigate(`/employees/${emp.id}`)}
-                        >
-                          <Ticket size={12} /> Ver tickets
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => setEditing(emp)}
-                        >
-                          <Edit2 size={12} /> Editar
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </p>
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-xs">
+                      {emp.username ? (
+                        <span className="font-mono text-[#F59E0B]">
+                          @{emp.username}
+                        </span>
+                      ) : null}
+                      <span className="font-mono text-[#64748B]">
+                        C.C. {emp.document}
+                      </span>
+                    </div>
+                  </div>
+                  <Badge variant={emp.active ? "success" : "danger"} className="shrink-0">
+                    {emp.active ? "● Activo" : "● Inactivo"}
+                  </Badge>
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-white/[0.05] text-xs text-[#64748B]">
+                  <span>Registrado: {new Date(emp.createdAt).toLocaleDateString("es-CO")}</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="w-full justify-center"
+                    onClick={() => navigate(`/employees/${emp.id}`)}
+                  >
+                    <Ticket size={13} /> Ver tickets
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="w-full justify-center"
+                    onClick={() => setEditing(emp)}
+                  >
+                    <Edit2 size={13} /> Editar
+                  </Button>
+                </div>
+              </Card>
+            ))}
           </div>
-        )}
-      </Card>
+
+          {/* Vista desktop / tablet: Tabla completa */}
+          <Card className="p-0 overflow-hidden hidden md:block">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/[0.07] text-xs text-[#64748B] uppercase tracking-wider">
+                    <th className="px-5 py-3 text-left font-medium">Nombre</th>
+                    <th className="px-5 py-3 text-left font-medium">Usuario</th>
+                    <th className="px-5 py-3 text-left font-medium">Documento</th>
+                    <th className="px-5 py-3 text-left font-medium">Estado</th>
+                    <th className="px-5 py-3 text-left font-medium">Creado</th>
+                    <th className="px-5 py-3 text-right font-medium">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/[0.04]">
+                  {filtered.map((emp) => (
+                    <tr
+                      key={emp.id}
+                      className="hover:bg-white/[0.02] transition-colors"
+                    >
+                      <td className="px-5 py-3 font-semibold text-[#F1F5F9]">
+                        {emp.name}
+                      </td>
+                      <td className="px-5 py-3 font-mono text-[#F59E0B] text-xs">
+                        {emp.username ? `@${emp.username}` : "—"}
+                      </td>
+                      <td className="px-5 py-3 font-mono text-[#64748B] text-xs">
+                        {emp.document}
+                      </td>
+                      <td className="px-5 py-3">
+                        <Badge variant={emp.active ? "success" : "danger"}>
+                          {emp.active ? "● Activo" : "● Inactivo"}
+                        </Badge>
+                      </td>
+                      <td className="px-5 py-3 text-[#64748B] text-xs">
+                        {new Date(emp.createdAt).toLocaleDateString("es-CO")}
+                      </td>
+                      <td className="px-5 py-3">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => navigate(`/employees/${emp.id}`)}
+                          >
+                            <Ticket size={12} /> Ver tickets
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => setEditing(emp)}
+                          >
+                            <Edit2 size={12} /> Editar
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </>
+      )}
 
       <CreateModal
         open={showCreate}

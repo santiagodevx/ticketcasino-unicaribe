@@ -18,7 +18,7 @@ function AdminLayout({ children }) {
   return (
     <div className="flex min-h-screen bg-[#090B10]">
       <Sidebar />
-      <main className="flex-1 ml-0 md:ml-[240px] pt-20 p-6 lg:p-8 md:pt-6 lg:pt-8 min-h-screen">
+      <main className="flex-1 ml-0 md:ml-[240px] pt-20 px-4 pb-6 sm:px-6 sm:pb-8 md:pt-6 md:px-6 lg:p-8 min-h-screen w-full max-w-full overflow-x-hidden">
         {children}
       </main>
     </div>
