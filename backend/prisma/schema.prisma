@@ -32,15 +32,16 @@ model User {
 }
 
 model Employee {
-  id        String   @id @default(cuid())
-  document  String   @unique
-  name      String
-  active    Boolean  @default(true)
-  username  String?  @unique
-  password  String
-  passkey   Json?
-  createdAt DateTime @default(now())
-  tickets   Ticket[]
+  id                 String   @id @default(cuid())
+  document           String   @unique
+  name               String
+  active             Boolean  @default(true)
+  username           String?  @unique
+  password           String
+  mustChangePassword Boolean  @default(false)
+  passkey            Json?
+  createdAt          DateTime @default(now())
+  tickets            Ticket[]
 }
 
 model Ticket {

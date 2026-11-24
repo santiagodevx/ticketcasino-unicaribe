@@ -158,6 +158,7 @@ export class EmployeesService {
       dtos.map(async (dto) => ({
         ...dto,
         password: await bcrypt.hash(dto.document, 10),
+        mustChangePassword: true,
       })),
     );
 
