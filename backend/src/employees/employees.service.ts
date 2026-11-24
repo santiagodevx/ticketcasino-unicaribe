@@ -2,11 +2,16 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateEmployeeDto } from './dto/create-employee.dto.js';
 import { UpdateEmployeeDto } from './dto/update-employee.dto.js';
+import { parse } from 'csv-parse/sync';
 import * as bcrypt from 'bcryptjs';
+import { plainToInstance } from 'class-transformer';
+import { EmployeeRowDto } from './dto/employee-row.dto.js';
 
 const EMPLOYEE_SELECT = {
   id: true,
@@ -19,6 +24,7 @@ const EMPLOYEE_SELECT = {
 
 @Injectable()
 export class EmployeesService {
+  private readonly logger = new Logger(EmployeesService.name);
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateEmployeeDto) {
@@ -114,6 +120,60 @@ export class EmployeesService {
     });
   }
 
+  async importCsv(buffer: Buffer) {
+    const records = this.parseCsv(buffer);
+
+    const documents = records.map((r) => r.document).filter(Boolean);
+
+    const docsInDb = await this.prisma.employee.findMany({
+      where: { document: { in: documents } },
+      select: { document: true },
+    });
+
+    const existing = new Set(docsInDb.map((e) => e.document));
+    const seenInFile = new Set<string>();
+
+    const dtos: EmployeeRowDto[] = [];
+    const alreadyInDb: string[] = [];
+    const duplicatedInFile: string[] = [];
+
+    for (const record of records) {
+      const dto = plainToInstance(EmployeeRowDto, record);
+
+      if (existing.has(dto.document)) {
+        alreadyInDb.push(dto.document);
+        continue;
+      }
+
+      if (seenInFile.has(dto.document)) {
+        duplicatedInFile.push(dto.document);
+        continue;
+      }
+
+      seenInFile.add(dto.document);
+      dtos.push(dto);
+    }
+
+    const data = await Promise.all(
+      dtos.map(async (dto) => ({
+        ...dto,
+        password: await bcrypt.hash(dto.document, 10),
+      })),
+    );
+
+    if (data.length) {
+      await this.prisma.employee.createMany({ data });
+    }
+
+    return {
+      total: records.length,
+      created: data.length,
+      skipped: alreadyInDb.length + duplicatedInFile.length,
+      alreadyInDb,
+      duplicatedInFile,
+    };
+  }
+
   // Guarda/actualiza la passkey biométrica del empleado
   async savePasskey(id: string, passkey: unknown) {
     await this.findOne(id);
@@ -123,5 +183,21 @@ export class EmployeesService {
       data: { passkey: passkey as any },
       select: EMPLOYEE_SELECT,
     });
+  }
+
+  private parseCsv(buffer: Buffer): Record<string, string>[] {
+    let records: Record<string, string>[];
+    try {
+      records = parse(buffer, {
+        columns: true,
+        skip_empty_lines: true,
+        trim: true,
+        bom: true,
+      });
+    } catch (e) {
+      throw new BadRequestException(`CSV inválido: ${(e as Error).message}`);
+    }
+    if (!records.length) throw new BadRequestException('El CSV no tiene filas');
+    return records;
   }
 }

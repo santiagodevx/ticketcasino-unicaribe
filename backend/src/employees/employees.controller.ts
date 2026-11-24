@@ -6,12 +6,21 @@ import {
   Param,
   Body,
   UseGuards,
+  UseInterceptors,
+  BadRequestException,
+  UploadedFile,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { EmployeesService } from './employees.service.js';
 import { CreateEmployeeDto } from './dto/create-employee.dto.js';
 import { UpdateEmployeeDto } from './dto/update-employee.dto.js';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Empleados')
 @ApiBearerAuth('JWT-auth')
@@ -35,7 +44,9 @@ export class EmployeesController {
     return this.employeesService.findAll();
   }
 
-  @ApiOperation({ summary: 'Obtener información y tickets de un empleado por ID' })
+  @ApiOperation({
+    summary: 'Obtener información y tickets de un empleado por ID',
+  })
   @ApiResponse({ status: 200, description: 'Detalle del empleado' })
   @ApiResponse({ status: 404, description: 'Empleado no encontrado' })
   @Get(':id')
@@ -49,6 +60,28 @@ export class EmployeesController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateEmployeeDto) {
     return this.employeesService.update(id, dto);
+  }
+
+  @ApiOperation({ summary: 'importar empleados de un CSV' })
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 2 * 1024 * 1024 },
+      fileFilter(_req, file, callback) {
+        const isCsv = file.originalname.endsWith('.csv');
+        callback(
+          isCsv
+            ? null
+            : new BadRequestException('Solo se aceptan archivos .csv'),
+          isCsv,
+        );
+      },
+    }),
+  )
+  @Post('import')
+  async importCsv(@UploadedFile() file: Express.Multer.File) {
+    if (!file) throw new BadRequestException('El archivo es requerido!');
+
+    return await this.employeesService.importCsv(file.buffer);
   }
 
   @ApiOperation({ summary: 'Registrar credencial/passkey para biometría' })
