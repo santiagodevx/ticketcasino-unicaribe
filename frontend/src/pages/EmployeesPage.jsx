@@ -8,7 +8,6 @@ import {
   Loader2,
   Upload,
   FileText,
-  CheckCircle2,
   AlertCircle,
   AlertTriangle,
 } from "lucide-react";
@@ -98,8 +97,8 @@ function ImportCsvModal({ open, onClose, onImported }) {
           <DialogTitle>Importar Empleados desde CSV</DialogTitle>
           <DialogDescription>
             Sube un archivo .csv con las columnas{" "}
-            <code className="text-[#F59E0B]">name</code> y{" "}
-            <code className="text-[#F59E0B]">document</code>.
+            <code className="text-primary">name</code> y{" "}
+            <code className="text-primary">document</code>.
           </DialogDescription>
         </DialogHeader>
 
@@ -107,10 +106,10 @@ function ImportCsvModal({ open, onClose, onImported }) {
           <form onSubmit={submit} className="space-y-4">
             <div
               onClick={() => fileInputRef.current?.click()}
-              className={`flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-xl cursor-pointer transition-colors ${
+              className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 transition-colors ${
                 file
-                  ? "border-[#F59E0B]/50 bg-[#F59E0B]/5"
-                  : "border-white/10 hover:border-white/20 bg-white/[0.02]"
+                  ? "border-primary/50 bg-primary/5"
+                  : "border-white/10 bg-white/2 hover:border-white/20"
               }`}
             >
               <input
@@ -122,36 +121,36 @@ function ImportCsvModal({ open, onClose, onImported }) {
               />
               {file ? (
                 <div className="flex flex-col items-center gap-2 text-center">
-                  <FileText className="text-[#F59E0B]" size={36} />
-                  <span className="text-sm font-semibold text-[#F1F5F9] break-all">
+                  <FileText className="text-primary" size={36} />
+                  <span className="text-sm font-semibold break-all text-text">
                     {file.name}
                   </span>
-                  <span className="text-xs text-[#64748B]">
+                  <span className="text-xs text-muted">
                     {(file.size / 1024).toFixed(1)} KB — Clic para cambiar
                   </span>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-2 text-center">
-                  <Upload className="text-[#64748B]" size={36} />
-                  <span className="text-sm font-medium text-[#F1F5F9]">
+                  <Upload className="text-muted" size={36} />
+                  <span className="text-sm font-medium text-text">
                     Haz clic para seleccionar tu archivo CSV
                   </span>
-                  <span className="text-xs text-[#64748B]">
-                    Máximo 2 MB (.csv)
-                  </span>
+                  <span className="text-xs text-muted">Máximo 2 MB (.csv)</span>
                 </div>
               )}
             </div>
 
-            <div className="rounded-lg bg-white/[0.03] p-3 text-xs text-[#94A3B8] space-y-1 border border-white/[0.05]">
-              <p className="font-semibold text-[#F1F5F9]">
+            <div className="space-y-1 rounded-lg border border-white/5 bg-white/3 p-3 text-xs text-[#94A3B8]">
+              <p className="font-semibold text-text">
                 Formato esperado del CSV:
               </p>
-              <p className="font-mono text-[#D97706]">document,name,active</p>
-              <p className="font-mono text-[#64748B]">
+              <p className="font-mono text-primary-dark">
+                document,name,active
+              </p>
+              <p className="font-mono text-muted">
                 1045678901,Juan Carlos Pérez,true
               </p>
-              <p className="text-[11px] text-[#64748B] pt-1">
+              <p className="pt-1 text-[11px] text-muted">
                 * La contraseña inicial asignada será el mismo número de
                 documento.
               </p>
@@ -177,22 +176,20 @@ function ImportCsvModal({ open, onClose, onImported }) {
         ) : (
           <div className="space-y-4">
             <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="p-3 bg-white/[0.02] border border-white/[0.05] rounded-lg">
-                <span className="text-xs text-[#64748B] block">
-                  Total filas
-                </span>
-                <span className="text-lg font-bold text-[#F1F5F9]">
+              <div className="rounded-lg border border-white/5 bg-white/2 p-3">
+                <span className="block text-xs text-muted">Total filas</span>
+                <span className="text-lg font-bold text-text">
                   {result.total}
                 </span>
               </div>
-              <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-                <span className="text-xs text-emerald-400 block">Creados</span>
+              <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3">
+                <span className="block text-xs text-emerald-400">Creados</span>
                 <span className="text-lg font-bold text-emerald-400">
                   {result.created}
                 </span>
               </div>
-              <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-                <span className="text-xs text-amber-400 block">Omitidos</span>
+              <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 p-3">
+                <span className="block text-xs text-amber-400">Omitidos</span>
                 <span className="text-lg font-bold text-amber-400">
                   {result.skipped}
                 </span>
@@ -201,11 +198,11 @@ function ImportCsvModal({ open, onClose, onImported }) {
 
             {result.alreadyInDb?.length > 0 && (
               <div className="space-y-1 text-xs">
-                <span className="text-amber-400 flex items-center gap-1.5 font-medium">
+                <span className="flex items-center gap-1.5 font-medium text-amber-400">
                   <AlertTriangle size={13} /> Ya registrados en la BD (
                   {result.alreadyInDb.length}):
                 </span>
-                <p className="text-[#64748B] bg-white/[0.02] p-2 rounded border border-white/[0.05] font-mono break-all max-h-24 overflow-y-auto">
+                <p className="max-h-24 overflow-y-auto rounded-sm border border-white/5 bg-white/2 p-2 font-mono break-all text-muted">
                   {result.alreadyInDb.join(", ")}
                 </p>
               </div>
@@ -213,11 +210,11 @@ function ImportCsvModal({ open, onClose, onImported }) {
 
             {result.duplicatedInFile?.length > 0 && (
               <div className="space-y-1 text-xs">
-                <span className="text-amber-400 flex items-center gap-1.5 font-medium">
+                <span className="flex items-center gap-1.5 font-medium text-amber-400">
                   <AlertCircle size={13} /> Duplicados en el archivo (
                   {result.duplicatedInFile.length}):
                 </span>
-                <p className="text-[#64748B] bg-white/[0.02] p-2 rounded border border-white/[0.05] font-mono break-all max-h-24 overflow-y-auto">
+                <p className="max-h-24 overflow-y-auto rounded-sm border border-white/5 bg-white/2 p-2 font-mono break-all text-muted">
                   {result.duplicatedInFile.join(", ")}
                 </p>
               </div>
@@ -280,7 +277,7 @@ function CreateModal({ open, onClose, onCreated }) {
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-[#94A3B8] uppercase tracking-wide">
+            <label className="text-xs font-medium tracking-wide text-[#94A3B8] uppercase">
               Nombre completo
             </label>
             <Input
@@ -291,7 +288,7 @@ function CreateModal({ open, onClose, onCreated }) {
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-[#94A3B8] uppercase tracking-wide">
+            <label className="text-xs font-medium tracking-wide text-[#94A3B8] uppercase">
               Cédula / Documento
             </label>
             <Input
@@ -301,7 +298,7 @@ function CreateModal({ open, onClose, onCreated }) {
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-[#94A3B8] uppercase tracking-wide">
+            <label className="text-xs font-medium tracking-wide text-[#94A3B8] uppercase">
               Usuario para la app
             </label>
             <Input
@@ -311,7 +308,7 @@ function CreateModal({ open, onClose, onCreated }) {
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-[#94A3B8] uppercase tracking-wide">
+            <label className="text-xs font-medium tracking-wide text-[#94A3B8] uppercase">
               Contraseña
             </label>
             <Input
@@ -393,13 +390,13 @@ function EditModal({ open, employee, onClose, onUpdated }) {
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-[#94A3B8] uppercase tracking-wide">
+            <label className="text-xs font-medium tracking-wide text-[#94A3B8] uppercase">
               Documento
             </label>
             <Input value={employee.document} disabled className="opacity-50" />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-[#94A3B8] uppercase tracking-wide">
+            <label className="text-xs font-medium tracking-wide text-[#94A3B8] uppercase">
               Nombre completo
             </label>
             <Input
@@ -409,7 +406,7 @@ function EditModal({ open, employee, onClose, onUpdated }) {
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-[#94A3B8] uppercase tracking-wide">
+            <label className="text-xs font-medium tracking-wide text-[#94A3B8] uppercase">
               Usuario
             </label>
             <Input
@@ -418,7 +415,7 @@ function EditModal({ open, employee, onClose, onUpdated }) {
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-[#94A3B8] uppercase tracking-wide">
+            <label className="text-xs font-medium tracking-wide text-[#94A3B8] uppercase">
               Nueva contraseña (opcional)
             </label>
             <Input
@@ -434,11 +431,11 @@ function EditModal({ open, employee, onClose, onUpdated }) {
               id="active-check"
               checked={form.active}
               onChange={(e) => setForm({ ...form, active: e.target.checked })}
-              className="h-4 w-4 rounded accent-[#F59E0B]"
+              className="size-4  rounded-sm accent-primary"
             />
             <label
               htmlFor="active-check"
-              className="text-sm text-[#94A3B8] cursor-pointer select-none"
+              className="cursor-pointer text-sm text-[#94A3B8] select-none"
             >
               Empleado activo en el sistema
             </label>
@@ -511,24 +508,24 @@ export default function EmployeesPage() {
       {/* Header & Actions */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-[#F1F5F9]">Empleados</h2>
-          <p className="text-sm text-[#64748B]">
+          <h2 className="text-xl font-bold text-text sm:text-2xl">Empleados</h2>
+          <p className="text-sm text-muted">
             Gestión del personal y sus credenciales de acceso
           </p>
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2.5">
+        <div className="grid grid-cols-2 gap-2.5 sm:flex sm:items-center">
           <Button
             variant="secondary"
-            className="w-full sm:w-auto h-10 px-3.5 justify-center font-medium shadow-sm hover:border-white/20"
+            className="h-10 w-full justify-center px-3.5 font-medium shadow-sm hover:border-white/20 sm:w-auto"
             onClick={() => setShowImport(true)}
           >
-            <Upload size={16} className="text-[#F59E0B]" />
+            <Upload size={16} className="text-primary" />
             <span className="truncate">Importar CSV</span>
           </Button>
           <Button
-            className="w-full sm:w-auto h-10 px-4 justify-center font-semibold shadow-sm shadow-[#F59E0B]/10 hover:shadow-[#F59E0B]/20"
+            className="h-10 w-full justify-center px-4 font-semibold shadow-sm shadow-primary/10 hover:shadow-primary/20 sm:w-auto"
             onClick={() => setShowCreate(true)}
           >
             <UserPlus size={16} />
@@ -540,7 +537,7 @@ export default function EmployeesPage() {
       {/* Search Toolbar */}
       <div className="relative">
         <Input
-          className="w-full sm:max-w-md h-10 bg-[#10141D] border-white/[0.08] focus:border-[#F59E0B]/50 pl-3.5"
+          className="h-10 w-full border-white/8 bg-surface pl-3.5 focus:border-primary/50 sm:max-w-md"
           placeholder="Buscar por nombre, usuario o cédula..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -549,14 +546,14 @@ export default function EmployeesPage() {
 
       {/* Employees list */}
       {loading ? (
-        <Card className="p-0 overflow-hidden">
-          <div className="flex items-center justify-center gap-3 py-16 text-[#64748B]">
+        <Card className="overflow-hidden p-0">
+          <div className="flex items-center justify-center gap-3 py-16 text-muted">
             <Loader2 size={18} className="spin" /> Cargando empleados...
           </div>
         </Card>
       ) : filtered.length === 0 ? (
-        <Card className="p-0 overflow-hidden">
-          <div className="flex flex-col items-center justify-center gap-3 py-16 text-[#64748B]">
+        <Card className="overflow-hidden p-0">
+          <div className="flex flex-col items-center justify-center gap-3 py-16 text-muted">
             <Users size={36} strokeWidth={1.5} />
             <p className="text-sm">
               {search
@@ -570,30 +567,36 @@ export default function EmployeesPage() {
           {/* Vista móvil: Cards compactas para evitar desborde de pantalla */}
           <div className="space-y-3 md:hidden">
             {filtered.map((emp) => (
-              <Card key={emp.id} className="p-4 space-y-3 border-white/[0.07]">
+              <Card key={emp.id} className="space-y-3 border-white/[0.07] p-4">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-[#F1F5F9] truncate">
+                    <p className="truncate font-semibold text-text">
                       {emp.name}
                     </p>
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-xs">
+                    <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
                       {emp.username ? (
-                        <span className="font-mono text-[#F59E0B]">
+                        <span className="font-mono text-primary">
                           @{emp.username}
                         </span>
                       ) : null}
-                      <span className="font-mono text-[#64748B]">
+                      <span className="font-mono text-muted">
                         C.C. {emp.document}
                       </span>
                     </div>
                   </div>
-                  <Badge variant={emp.active ? "success" : "danger"} className="shrink-0">
+                  <Badge
+                    variant={emp.active ? "success" : "danger"}
+                    className="shrink-0"
+                  >
                     {emp.active ? "● Activo" : "● Inactivo"}
                   </Badge>
                 </div>
 
-                <div className="flex items-center justify-between pt-2 border-t border-white/[0.05] text-xs text-[#64748B]">
-                  <span>Registrado: {new Date(emp.createdAt).toLocaleDateString("es-CO")}</span>
+                <div className="flex items-center justify-between border-t border-white/5 pt-2 text-xs text-muted">
+                  <span>
+                    Registrado:{" "}
+                    {new Date(emp.createdAt).toLocaleDateString("es-CO")}
+                  </span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 pt-1">
@@ -619,32 +622,36 @@ export default function EmployeesPage() {
           </div>
 
           {/* Vista desktop / tablet: Tabla completa */}
-          <Card className="p-0 overflow-hidden hidden md:block">
+          <Card className="hidden overflow-hidden p-0 md:block">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-white/[0.07] text-xs text-[#64748B] uppercase tracking-wider">
+                  <tr className="border-b border-white/[0.07] text-xs tracking-wider text-muted uppercase">
                     <th className="px-5 py-3 text-left font-medium">Nombre</th>
                     <th className="px-5 py-3 text-left font-medium">Usuario</th>
-                    <th className="px-5 py-3 text-left font-medium">Documento</th>
+                    <th className="px-5 py-3 text-left font-medium">
+                      Documento
+                    </th>
                     <th className="px-5 py-3 text-left font-medium">Estado</th>
                     <th className="px-5 py-3 text-left font-medium">Creado</th>
-                    <th className="px-5 py-3 text-right font-medium">Acciones</th>
+                    <th className="px-5 py-3 text-right font-medium">
+                      Acciones
+                    </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/[0.04]">
+                <tbody className="divide-y divide-white/4">
                   {filtered.map((emp) => (
                     <tr
                       key={emp.id}
-                      className="hover:bg-white/[0.02] transition-colors"
+                      className="transition-colors hover:bg-white/2"
                     >
-                      <td className="px-5 py-3 font-semibold text-[#F1F5F9]">
+                      <td className="px-5 py-3 font-semibold text-text">
                         {emp.name}
                       </td>
-                      <td className="px-5 py-3 font-mono text-[#F59E0B] text-xs">
+                      <td className="px-5 py-3 font-mono text-xs text-primary">
                         {emp.username ? `@${emp.username}` : "—"}
                       </td>
-                      <td className="px-5 py-3 font-mono text-[#64748B] text-xs">
+                      <td className="px-5 py-3 font-mono text-xs text-muted">
                         {emp.document}
                       </td>
                       <td className="px-5 py-3">
@@ -652,7 +659,7 @@ export default function EmployeesPage() {
                           {emp.active ? "● Activo" : "● Inactivo"}
                         </Badge>
                       </td>
-                      <td className="px-5 py-3 text-[#64748B] text-xs">
+                      <td className="px-5 py-3 text-xs text-muted">
                         {new Date(emp.createdAt).toLocaleDateString("es-CO")}
                       </td>
                       <td className="px-5 py-3">

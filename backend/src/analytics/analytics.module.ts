@@ -7,4 +7,3 @@ import { AnalyticsService } from './analytics.service.js';
   providers: [AnalyticsService],
 })
 export class AnalyticsModule {}
-

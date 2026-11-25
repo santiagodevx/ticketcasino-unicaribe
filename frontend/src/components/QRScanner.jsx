@@ -1,8 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
-import { BrowserMultiFormatReader } from '@zxing/browser';
-import { NotFoundException } from '@zxing/library';
-import { Camera, CameraOff, CheckCircle2, RefreshCw, X, ScanLine } from 'lucide-react';
-import { Button } from './ui/button';
+import { useEffect, useRef, useState } from "react";
+import { BrowserMultiFormatReader } from "@zxing/browser";
+import { NotFoundException } from "@zxing/library";
+import {
+  Camera,
+  CameraOff,
+  CheckCircle2,
+  RefreshCw,
+  X,
+  ScanLine,
+} from "lucide-react";
+import { Button } from "./ui/button";
 
 /**
  * QRScanner
@@ -15,7 +22,13 @@ import { Button } from './ui/button';
  *   countdown           — segundos restantes para autoreinicio
  *   ScanSuccess         — componente de éxito inyectado desde el padre
  */
-export default function QRScanner({ onScan, onClose, successTicket, countdown, ScanSuccess }) {
+export default function QRScanner({
+  onScan,
+  onClose,
+  successTicket,
+  countdown,
+  ScanSuccess,
+}) {
   const videoRef = useRef(null);
   const readerRef = useRef(null);
   const [error, setError] = useState(null);
@@ -31,7 +44,7 @@ export default function QRScanner({ onScan, onClose, successTicket, countdown, S
     BrowserMultiFormatReader.listVideoInputDevices()
       .then((devices) => {
         if (!devices || devices.length === 0) {
-          setError('No se encontró ninguna cámara disponible.');
+          setError("No se encontró ninguna cámara disponible.");
           return;
         }
         // Prefiere cámara trasera
@@ -43,12 +56,18 @@ export default function QRScanner({ onScan, onClose, successTicket, countdown, S
         setCameras(sorted);
       })
       .catch(() => {
-        setError('No se pudo acceder a la cámara. Comprueba los permisos del navegador.');
+        setError(
+          "No se pudo acceder a la cámara. Comprueba los permisos del navegador.",
+        );
       });
 
     return () => {
       if (readerRef.current) {
-        try { readerRef.current.reset(); } catch { /* noop */ }
+        try {
+          readerRef.current.reset();
+        } catch {
+          /* noop */
+        }
       }
     };
   }, []);
@@ -66,34 +85,46 @@ export default function QRScanner({ onScan, onClose, successTicket, countdown, S
         if (stopped || successTicket) return;
         if (result) {
           stopped = true;
-          try { codeReader.reset(); } catch { /* noop */ }
+          try {
+            codeReader.reset();
+          } catch {
+            /* noop */
+          }
           onScan(result.getText());
         } else if (err && !(err instanceof NotFoundException)) {
-          console.warn('QR scan error:', err);
+          console.warn("QR scan error:", err);
         }
       })
-      .then(() => { if (!stopped) setReady(true); })
+      .then(() => {
+        if (!stopped) setReady(true);
+      })
       .catch((err) => {
         if (stopped) return;
         setError(
-          err?.message?.includes('Permission')
-            ? 'Permiso de cámara denegado. Habilítalo en el navegador e intenta de nuevo.'
-            : `Error al iniciar la cámara: ${err?.message ?? err}`
+          err?.message?.includes("Permission")
+            ? "Permiso de cámara denegado. Habilítalo en el navegador e intenta de nuevo."
+            : `Error al iniciar la cámara: ${err?.message ?? err}`,
         );
       });
 
     return () => {
       stopped = true;
-      try { codeReader.reset(); } catch { /* noop */ }
+      try {
+        codeReader.reset();
+      } catch {
+        /* noop */
+      }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cameras, activeCamIdx, onScan]);
 
   // Cerrar con Escape
   useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape' && !successTicket) onClose(); };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    const handler = (e) => {
+      if (e.key === "Escape" && !successTicket) onClose();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
   }, [onClose, successTicket]);
 
   const switchCamera = () => setActiveCamIdx((i) => (i + 1) % cameras.length);
@@ -101,31 +132,38 @@ export default function QRScanner({ onScan, onClose, successTicket, countdown, S
   return (
     /* Overlay a pantalla completa */
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-label="Escáner de código QR"
     >
-      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#10141D] overflow-hidden shadow-2xl">
-
+      <div className="w-full max-w-sm overflow-hidden rounded-2xl border border-white/10 bg-surface shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.07]">
+        <div className="flex items-center justify-between border-b border-white/[0.07] px-5 py-4">
           <div>
-            <h3 className="flex items-center gap-2 text-sm font-bold text-[#F1F5F9]">
+            <h3 className="flex items-center gap-2 text-sm font-bold text-text">
               {successTicket ? (
-                <><CheckCircle2 size={17} className="text-emerald-400" /> ¡Ticket escaneado!</>
+                <>
+                  <CheckCircle2 size={17} className="text-emerald-400" />{" "}
+                  ¡Ticket escaneado!
+                </>
               ) : (
-                <><Camera size={17} className="text-[#F59E0B]" /> Escanear Ticket QR</>
+                <>
+                  <Camera size={17} className="text-primary" /> Escanear Ticket
+                  QR
+                </>
               )}
             </h3>
-            <p className="text-xs text-[#64748B] mt-0.5">
-              {successTicket ? 'Listo para el siguiente ticket' : 'Apunta la cámara al código QR del empleado'}
+            <p className="mt-0.5 text-xs text-muted">
+              {successTicket
+                ? "Listo para el siguiente ticket"
+                : "Apunta la cámara al código QR del empleado"}
             </p>
           </div>
           {!successTicket && (
             <button
               type="button"
-              className="rounded-lg p-1.5 text-[#64748B] hover:bg-white/5 hover:text-[#F1F5F9] transition-colors"
+              className="rounded-lg p-1.5 text-muted transition-colors hover:bg-white/5 hover:text-text"
               onClick={onClose}
               aria-label="Cerrar escáner"
             >
@@ -135,19 +173,21 @@ export default function QRScanner({ onScan, onClose, successTicket, countdown, S
         </div>
 
         {/* Visor */}
-        <div className="relative bg-black" style={{ aspectRatio: '4/3' }}>
+        <div className="relative bg-black" style={{ aspectRatio: "4/3" }}>
           {error ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center">
-              <CameraOff size={38} className="text-[#64748B]" />
+              <CameraOff size={38} className="text-muted" />
               <p className="text-sm text-[#94A3B8]">{error}</p>
-              <Button variant="secondary" size="sm" onClick={onClose}>Cerrar</Button>
+              <Button variant="secondary" size="sm" onClick={onClose}>
+                Cerrar
+              </Button>
             </div>
           ) : (
             <>
               {/* Video siempre renderizado (oculto durante el éxito) */}
               <video
                 ref={videoRef}
-                className="absolute inset-0 h-full w-full object-cover"
+                className="absolute inset-0 size-full  object-cover"
                 style={{ opacity: successTicket ? 0 : 1 }}
                 autoPlay
                 playsInline
@@ -158,21 +198,27 @@ export default function QRScanner({ onScan, onClose, successTicket, countdown, S
               {!successTicket && ready && (
                 <>
                   {/* Frame corners */}
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="relative" style={{ width: '60%', aspectRatio: '1' }}>
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                    <div
+                      className="relative"
+                      style={{ width: "60%", aspectRatio: "1" }}
+                    >
                       {/* Esquinas */}
-                      <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#F59E0B] rounded-tl-sm" />
-                      <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#F59E0B] rounded-tr-sm" />
-                      <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#F59E0B] rounded-bl-sm" />
-                      <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#F59E0B] rounded-br-sm" />
+                      <div className="absolute top-0 left-0 size-6  rounded-tl-sm border-t-2 border-l-2 border-primary" />
+                      <div className="absolute top-0 right-0 size-6  rounded-tr-sm border-t-2 border-r-2 border-primary" />
+                      <div className="absolute bottom-0 left-0 size-6  rounded-bl-sm border-b-2 border-l-2 border-primary" />
+                      <div className="absolute right-0 bottom-0 size-6  rounded-br-sm border-r-2 border-b-2 border-primary" />
                       {/* Línea de escaneo animada */}
                       <div
-                        className="absolute left-1 right-1 h-0.5 bg-[#F59E0B]/70"
-                        style={{ animation: 'tc-scan 2s ease-in-out infinite', top: '50%' }}
+                        className="absolute inset-x-1  h-0.5 bg-primary/70"
+                        style={{
+                          animation: "tc-scan 2s ease-in-out infinite",
+                          top: "50%",
+                        }}
                       />
                     </div>
                   </div>
-                  <div className="absolute bottom-3 left-0 right-0 flex justify-center">
+                  <div className="absolute inset-x-0 bottom-3  flex justify-center">
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1 text-xs text-[#94A3B8] backdrop-blur-sm">
                       <ScanLine size={13} /> Apunta al QR del ticket
                     </span>
@@ -190,16 +236,18 @@ export default function QRScanner({ onScan, onClose, successTicket, countdown, S
 
         {/* Controles */}
         {!error && !successTicket && cameras.length > 1 && (
-          <div className="flex justify-center px-5 py-3 border-t border-white/[0.07]">
+          <div className="flex justify-center border-t border-white/[0.07] px-5 py-3">
             <Button variant="secondary" size="sm" onClick={switchCamera}>
-              <RefreshCw size={13} /> Cambiar cámara ({activeCamIdx + 1}/{cameras.length})
+              <RefreshCw size={13} /> Cambiar cámara ({activeCamIdx + 1}/
+              {cameras.length})
             </Button>
           </div>
         )}
 
         {!error && !successTicket && cameras.length === 0 && (
-          <div className="flex items-center justify-center gap-2 px-5 py-3 text-xs text-[#64748B] border-t border-white/[0.07]">
-            <span className="spin inline-block">⏳</span> Accediendo a la cámara...
+          <div className="flex items-center justify-center gap-2 border-t border-white/[0.07] px-5 py-3 text-xs text-muted">
+            <span className="spin inline-block">⏳</span> Accediendo a la
+            cámara...
           </div>
         )}
       </div>

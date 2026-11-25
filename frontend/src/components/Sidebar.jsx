@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, QrCode, LogOut, Menu, X } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { LayoutDashboard, Users, QrCode, LogOut, Menu, X } from "lucide-react";
+import { cn } from "../lib/utils";
 
 const nav = [
-  { path: '/', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
-  { path: '/employees', label: 'Empleados', icon: <Users size={18} /> },
-  { path: '/validate', label: 'Validar QR', icon: <QrCode size={18} /> },
+  { path: "/", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
+  { path: "/employees", label: "Empleados", icon: <Users size={18} /> },
+  { path: "/validate", label: "Validar QR", icon: <QrCode size={18} /> },
 ];
 
 export default function Sidebar() {
@@ -25,20 +25,20 @@ export default function Sidebar() {
   // Lock background scroll when drawer is open on mobile
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     }
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     };
   }, [isOpen]);
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('employeeData');
-    navigate('/login');
+    localStorage.removeItem("token");
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("employeeData");
+    navigate("/login");
   };
 
   const handleNav = (path) => {
@@ -49,10 +49,10 @@ export default function Sidebar() {
   return (
     <>
       {/* Mobile Top Header (only visible on <= 768px) */}
-      <header className="fixed top-0 left-0 right-0 z-40 flex h-14 items-center justify-between border-b border-white/[0.07] bg-[#10141D] px-4 md:hidden">
+      <header className="fixed inset-x-0 top-0  z-40 flex h-14 items-center justify-between border-b border-white/[0.07] bg-surface px-4 md:hidden">
         <button
           type="button"
-          className="rounded-lg p-2 text-[#94A3B8] hover:bg-white/5 hover:text-[#F1F5F9] transition-colors"
+          className="rounded-lg p-2 text-[#94A3B8] transition-colors hover:bg-white/5 hover:text-text"
           onClick={() => setIsOpen(true)}
           aria-label="Abrir menú"
         >
@@ -60,16 +60,20 @@ export default function Sidebar() {
         </button>
 
         <div className="flex items-center gap-2">
-          <img src="/logo.png" alt="TicketCasino" className="h-7 w-7 rounded-md object-cover" />
+          <img
+            src="/logo.png"
+            alt="TicketCasino"
+            className="size-7  rounded-md object-cover"
+          />
           <span className="text-base font-bold tracking-tight">
-            <span className="text-[#F1F5F9]">Ticket</span>
-            <span className="text-[#D97706]">Casino</span>
+            <span className="text-text">Ticket</span>
+            <span className="text-primary-dark">Casino</span>
           </span>
         </div>
 
         <button
           type="button"
-          className="rounded-lg p-2 text-[#94A3B8] hover:bg-white/5 hover:text-[#F1F5F9] transition-colors"
+          className="rounded-lg p-2 text-[#94A3B8] transition-colors hover:bg-white/5 hover:text-text"
           onClick={logout}
           title="Cerrar sesión"
           aria-label="Cerrar sesión"
@@ -90,24 +94,28 @@ export default function Sidebar() {
       {/* Sidebar (Desktop fixed sidebar / Mobile drawer) */}
       <aside
         className={cn(
-          'fixed top-0 left-0 z-50 flex h-full w-[240px] flex-col border-r border-white/[0.07] bg-[#10141D] transition-transform duration-300',
-          'md:translate-x-0',
-          isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+          "fixed top-0 left-0 z-50 flex h-full w-[240px] flex-col border-r border-white/[0.07] bg-surface transition-transform duration-300",
+          "md:translate-x-0",
+          isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         )}
       >
         {/* Brand */}
-        <div className="flex h-16 items-center justify-between px-4 border-b border-white/[0.07]">
+        <div className="flex h-16 items-center justify-between border-b border-white/[0.07] px-4">
           <div className="flex items-center gap-2.5">
-            <img src="/logo.png" alt="TicketCasino" className="h-8 w-8 rounded-lg object-cover" />
-            <div className="text-base font-bold tracking-tight leading-none">
-              <span className="text-[#F1F5F9]">Ticket</span>
-              <span className="text-[#D97706]">Casino</span>
+            <img
+              src="/logo.png"
+              alt="TicketCasino"
+              className="size-8  rounded-lg object-cover"
+            />
+            <div className="text-base leading-none font-bold tracking-tight">
+              <span className="text-text">Ticket</span>
+              <span className="text-primary-dark">Casino</span>
             </div>
           </div>
           {/* Close button — mobile only */}
           <button
             type="button"
-            className="rounded-lg p-1.5 text-[#64748B] hover:bg-white/5 hover:text-[#F1F5F9] transition-colors md:hidden"
+            className="rounded-lg p-1.5 text-muted transition-colors hover:bg-white/5 hover:text-text md:hidden"
             onClick={() => setIsOpen(false)}
             aria-label="Cerrar menú"
           >
@@ -116,19 +124,23 @@ export default function Sidebar() {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
           {nav.map((item) => (
             <button
               key={item.path}
               className={cn(
-                'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors text-left',
+                "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors",
                 pathname === item.path
-                  ? 'bg-[#F59E0B]/10 text-[#F59E0B]'
-                  : 'text-[#94A3B8] hover:bg-white/5 hover:text-[#F1F5F9]'
+                  ? "bg-primary/10 text-primary"
+                  : "text-[#94A3B8] hover:bg-white/5 hover:text-text",
               )}
               onClick={() => handleNav(item.path)}
             >
-              <span className={pathname === item.path ? 'text-[#F59E0B]' : 'text-[#64748B]'}>
+              <span
+                className={
+                  pathname === item.path ? "text-primary" : "text-muted"
+                }
+              >
                 {item.icon}
               </span>
               {item.label}
@@ -139,10 +151,12 @@ export default function Sidebar() {
         {/* Footer */}
         <div className="border-t border-white/[0.07] px-3 py-4">
           <button
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#94A3B8] hover:bg-white/5 hover:text-[#F1F5F9] transition-colors"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#94A3B8] transition-colors hover:bg-white/5 hover:text-text"
             onClick={logout}
           >
-            <span className="text-[#64748B]"><LogOut size={18} /></span>
+            <span className="text-muted">
+              <LogOut size={18} />
+            </span>
             Cerrar sesión
           </button>
         </div>

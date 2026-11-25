@@ -1,24 +1,24 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'sonner';
-import Sidebar from './components/Sidebar';
-import LoginPage from './pages/LoginPage';
-import DashboardPage from './pages/DashboardPage';
-import EmployeesPage from './pages/EmployeesPage';
-import EmployeeDetailPage from './pages/EmployeeDetailPage';
-import ValidatePage from './pages/ValidatePage';
-import EmployeePortalPage from './pages/EmployeePortalPage';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "sonner";
+import Sidebar from "./components/Sidebar";
+import LoginPage from "./pages/LoginPage";
+import DashboardPage from "./pages/DashboardPage";
+import EmployeesPage from "./pages/EmployeesPage";
+import EmployeeDetailPage from "./pages/EmployeeDetailPage";
+import ValidatePage from "./pages/ValidatePage";
+import EmployeePortalPage from "./pages/EmployeePortalPage";
 
 function AdminLayout({ children }) {
-  const token = localStorage.getItem('token');
-  const role = localStorage.getItem('userRole');
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("userRole");
 
   if (!token) return <Navigate to="/login" replace />;
-  if (role === 'EMPLOYEE') return <Navigate to="/portal" replace />;
+  if (role === "EMPLOYEE") return <Navigate to="/portal" replace />;
 
   return (
-    <div className="flex min-h-screen bg-[#090B10]">
+    <div className="flex min-h-screen bg-bg">
       <Sidebar />
-      <main className="flex-1 ml-0 md:ml-[240px] pt-20 px-4 pb-6 sm:px-6 sm:pb-8 md:pt-6 md:px-6 lg:p-8 min-h-screen w-full max-w-full overflow-x-hidden">
+      <main className="ml-0 min-h-screen w-full max-w-full flex-1 overflow-x-hidden px-4 pt-20 pb-6 sm:px-6 sm:pb-8 md:ml-[240px] md:px-6 md:pt-6 lg:p-8">
         {children}
       </main>
     </div>
@@ -26,7 +26,7 @@ function AdminLayout({ children }) {
 }
 
 function EmployeeRoute({ children }) {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   if (!token) return <Navigate to="/login" replace />;
   return children;
 }
@@ -39,9 +39,9 @@ export default function App() {
         theme="dark"
         toastOptions={{
           style: {
-            background: '#10141D',
-            border: '1px solid rgba(255,255,255,0.1)',
-            color: '#F1F5F9',
+            background: "#10141D",
+            border: "1px solid rgba(255,255,255,0.1)",
+            color: "#F1F5F9",
           },
         }}
       />
