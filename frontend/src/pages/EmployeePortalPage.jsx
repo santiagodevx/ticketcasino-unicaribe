@@ -8,6 +8,8 @@ import {
   QrCode,
   Clock,
   Loader2,
+  KeyRound,
+  ShieldAlert,
 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "../api";
@@ -19,7 +21,14 @@ import {
   CardTitle,
   CardContent,
 } from "../components/ui/card";
-import { Dialog, DialogContent } from "../components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../components/ui/dialog";
 
 export default function EmployeePortalPage() {
   const navigate = useNavigate();
@@ -115,7 +124,11 @@ export default function EmployeePortalPage() {
     }
   };
 
+  // Mientras el empleado deba cambiar su contraseña, no puede usar el portal
+  const mustChange = !!employee?.mustChangePassword;
+
   const showTicketQR = (type) => {
+    if (mustChange) return;
     const ticket = activeTickets.find((t) => t.type === type);
     if (!ticket) {
       toast.error(`No tienes tickets activos de ${type} en este periodo`);
@@ -162,7 +175,7 @@ export default function EmployeePortalPage() {
           <div className="flex gap-2">
             <Button
               variant="secondary"
-              size="icon"
+              size="sm"
               onClick={() => loadData(false)}
               title="Actualizar"
             >
@@ -195,7 +208,7 @@ export default function EmployeePortalPage() {
             <Button
               className="mt-2 w-full"
               size="sm"
-              disabled={almuerzos.length === 0}
+              disabled={mustChange || almuerzos.length === 0}
               onClick={() => showTicketQR("ALMUERZO")}
             >
               <QrCode size={13} /> Mostrar QR
@@ -217,7 +230,7 @@ export default function EmployeePortalPage() {
               variant="secondary"
               className="mt-2 w-full"
               size="sm"
-              disabled={meriendas.length === 0}
+              disabled={mustChange || meriendas.length === 0}
               onClick={() => showTicketQR("MERIENDA")}
             >
               <QrCode size={13} /> Mostrar QR
@@ -311,6 +324,47 @@ export default function EmployeePortalPage() {
             <Button className="w-full" onClick={handleCloseModal}>
               Listo / Cerrar
             </Button>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Modal obligatorio: cambio de contraseña */}
+      {mustChange && (
+        <Dialog open>
+          <DialogContent
+            className="max-w-sm text-center [&>button]:hidden"
+            onEscapeKeyDown={(e) => e.preventDefault()}
+            onPointerDownOutside={(e) => e.preventDefault()}
+            onInteractOutside={(e) => e.preventDefault()}
+          >
+            <DialogHeader className="items-center">
+              <div className="mx-auto mb-3 flex size-16 items-center justify-center rounded-full bg-amber-500/10 ring-8 ring-amber-500/5">
+                <ShieldAlert className="size-8 text-amber-400" />
+              </div>
+              <DialogTitle className="text-lg font-extrabold text-text">
+                Cambio de contraseña requerido
+              </DialogTitle>
+              <DialogDescription className="text-sm leading-relaxed text-muted">
+                Por seguridad, debes actualizar tu contraseña antes de poder
+                usar tus tickets.
+              </DialogDescription>
+            </DialogHeader>
+
+            <DialogFooter className="mt-2 flex-col gap-2 sm:flex-col">
+              <Button
+                className="w-full"
+                onClick={() => navigate("/cambiar-contrasena")}
+              >
+                <KeyRound size={15} /> Cambiar contraseña
+              </Button>
+              <Button
+                variant="secondary"
+                className="w-full"
+                onClick={handleLogout}
+              >
+                <LogOut size={14} /> Cerrar sesión
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       )}

@@ -42,6 +42,7 @@ export const api = {
   // Auth
   login: (body) => apiClient.post("/auth/login", body),
   employeeLogin: (body) => apiClient.post("/auth/employee-login", body),
+  changePassword: (body) => apiClient.post("/auth/change-password", body),
 
   // Employees
   getEmployees: () => apiClient.get("/employees"),

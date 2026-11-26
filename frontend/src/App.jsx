@@ -7,6 +7,7 @@ import EmployeesPage from "./pages/EmployeesPage";
 import EmployeeDetailPage from "./pages/EmployeeDetailPage";
 import ValidatePage from "./pages/ValidatePage";
 import EmployeePortalPage from "./pages/EmployeePortalPage";
+import ChangePasswordPage from "./pages/ChangePasswordPage";
 
 function AdminLayout({ children }) {
   const token = localStorage.getItem("token");
@@ -52,6 +53,14 @@ export default function App() {
           element={
             <EmployeeRoute>
               <EmployeePortalPage />
+            </EmployeeRoute>
+          }
+        />
+        <Route
+          path="/cambiar-contrasena"
+          element={
+            <EmployeeRoute>
+              <ChangePasswordPage />
             </EmployeeRoute>
           }
         />
