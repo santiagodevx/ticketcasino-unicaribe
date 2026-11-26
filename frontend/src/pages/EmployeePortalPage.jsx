@@ -176,6 +176,14 @@ export default function EmployeePortalPage() {
             <Button
               variant="secondary"
               size="sm"
+              onClick={() => navigate("/cambiar-contrasena")}
+              title="Cambiar contraseña"
+            >
+              <KeyRound size={14} />
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => loadData(false)}
               title="Actualizar"
             >
